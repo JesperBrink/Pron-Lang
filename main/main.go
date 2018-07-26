@@ -11,6 +11,7 @@ import (
 	"io/ioutil"
 	"os"
 	"os/user"
+	"strings"
 )
 
 func check(e error) {
@@ -23,10 +24,26 @@ func main() {
 	out := os.Stdout
 
 	if len(os.Args) > 1 {
-		// Check file format
-		//docIndex :0 strings.Index(filename, ".")
+		filename := os.Args[1]
 
-		input, err := ioutil.ReadFile(os.Args[1])
+		docIndex := strings.Index(filename, ".")
+
+		// Check for missing fileformat
+		if docIndex == -1 {
+			fmt.Print("ERROR: Missing file type, should be .pron\n")
+			os.Exit(0)
+		}
+
+		fileType := string(filename[docIndex:])
+
+		// Check if fileformat is .pron
+		if fileType != ".pron" {
+			fmt.Print("ERROR: Filetype is not .pron\n")
+			os.Exit(0)
+		}
+
+		// Run Program
+		input, err := ioutil.ReadFile(filename)
 		check(err)
 
 		env := object.NewEnvironment()
@@ -44,7 +61,9 @@ func main() {
 			io.WriteString(out, evaluated.Inspect())
 			io.WriteString(out, "\n")
 		}
+
 	} else {
+		// Start REPL
 		user, err := user.Current()
 		if err != nil {
 			panic(err)

@@ -1,0 +1,3 @@
+var add = func(x,y) { x + y };
+var result = add(2,4);
+puts(result);

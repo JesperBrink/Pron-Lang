@@ -1,0 +1,31 @@
+- Rigth now Monkey supports ASCII characters. --> Try to make Monkey support UTF-8 instead.
+- Should isLetter in lexer.go be able to accept more that just a-z, A-Z and _
+- Implement floats
+- Implement else if
+- Sørg for at det ikke er nødvendigt med semikolon
+    - parseExpression() har en for-løkke, hvor den tjekker: !p.peekTokenIs(token.SEMICOLON) && X
+    Dette er dog ikke nødvendigt da, den anden del 'X', også vil være false, hvis der skulle 
+    forekomme et semikolon. 
+        - Det er derfor trivielt at lave denne metode uden semikolon i sproget
+
+- Tilføj character escaping til strings. fx. "hello \"world\"" should work
+- Giv en fejlbesked i stedet for bare at break, hvis der er fejl i readString() i lexer
+
+EVALUATOR:
+- For at optimere på enten memory, speed eller begge to kan du prøve at 
+lave den på en anden måde:
+    - Garbage collection
+    - Andet object system
+    - En helt andet tilgang end Tree-walking-interpreter
+    - osv.
+
+- I evalPrefixExpression i evaluator er default at returnere NULL. Overvej om der
+er noget der er smartere eller om det er okay at blive ved
+
+
+ERROR HANDLING:
+- Tilføj stact trace til en error. Derudover også linje og column numbers.
+   
+
+- Optimize the performance of HashKey()
+    - caching return values

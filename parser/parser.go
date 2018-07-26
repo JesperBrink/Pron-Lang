@@ -62,16 +62,21 @@ func (p *Parser) Errors() []string {
 	return p.errors
 }
 
-func (p *Parser) peekError(t token.TokenType) {
+// addPeekError adds an error to the parser about
+// the expected token and the token it got
+func (p *Parser) addPeekError(t token.TokenType) {
 	msg := fmt.Sprintf("expected next token to be %s, got %s instead", t, p.peekToken.Type)
 	p.errors = append(p.errors, msg)
 }
 
+// nextToken makes the parser's lexer focus on the next token
 func (p *Parser) nextToken() {
 	p.curToken = p.peekToken
 	p.peekToken = p.l.NextToken()
 }
 
+// ParseProgram parses the program that comes from the given lexer.
+// Returns an *ast.Program node
 func (p *Parser) ParseProgram() *ast.Program {
 	program := &ast.Program{}
 	program.Statements = []ast.Statement{}
@@ -184,7 +189,7 @@ func (p *Parser) expectPeek(t token.TokenType) bool {
 		p.nextToken()
 		return true
 	}
-	p.peekError(t)
+	p.addPeekError(t)
 	return false
 }
 

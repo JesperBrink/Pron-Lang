@@ -61,6 +61,7 @@ var keywords = map[string]TokenType{
 	"return": RETURN,
 }
 
+// Returns the TokenType that matches the ident given as argument.
 func LookupIdent(ident string) TokenType {
 	if tok, ok := keywords[ident]; ok {
 		return tok

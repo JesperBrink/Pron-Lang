@@ -52,7 +52,7 @@ const (
 )
 
 var keywords = map[string]TokenType{
-	"fn":     FUNCTION,
+	"func":   FUNCTION,
 	"var":    VAR,
 	"true":   TRUE,
 	"false":  FALSE,

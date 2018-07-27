@@ -508,7 +508,7 @@ func TestIfElseExpression(t *testing.T) {
 	}
 }
 
-func TestFunctionLiteralParsing(t *testing.T) {
+/*func TestFunctionLiteralParsing(t *testing.T) {
 	input := `func(x, y) { x + y; }`
 
 	l := lexer.New(input)
@@ -579,6 +579,60 @@ func TestFunctionParameterParsing(t *testing.T) {
 
 		for i, ident := range tt.expectedParams {
 			testLiteralExpression(t, function.Parameters[i], ident)
+		}
+	}
+}*/
+
+func TestDirectFunctionStatementParsing(t *testing.T) {
+	input := `func add(x, y) { x + y; }`
+
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+
+	if len(program.Statements) != 1 {
+		t.Fatalf("program.Body does not contain %d statements. got=%d\n",
+			1, len(program.Statements))
+	}
+	stmt, ok := program.Statements[0].(*ast.DirectFunctionStatement)
+	if !ok {
+		t.Fatalf("program.Statements[0] is not ast.DirectFunctionStatement. got=%T",
+			program.Statements[0])
+	}
+
+	if stmt.Name.String() != "add" {
+		t.Errorf("stmt.Name is not add. got=%s", stmt.Name)
+	}
+}
+
+func TestDirectFunctionParameterParsing(t *testing.T) {
+	tests := []struct {
+		input          string
+		expectedParams []string
+	}{
+		{input: "func doNothing() {};", expectedParams: []string{}},
+		{input: "func doNothing(x) {};", expectedParams: []string{"x"}},
+		{input: "func doNothing(x, y, z) {};", expectedParams: []string{"x", "y", "z"}},
+	}
+	for _, tt := range tests {
+		l := lexer.New(tt.input)
+		p := New(l)
+		program := p.ParseProgram()
+
+		fmt.Print(program.String())
+
+		checkParserErrors(t, p)
+
+		stmt := program.Statements[0].(*ast.DirectFunctionStatement)
+
+		if len(stmt.Function.Parameters) != len(tt.expectedParams) {
+			t.Errorf("length parameters wrong. want %d, got=%d\n",
+				len(tt.expectedParams), len(stmt.Function.Parameters))
+		}
+
+		for i, ident := range tt.expectedParams {
+			testLiteralExpression(t, stmt.Function.Parameters[i], ident)
 		}
 	}
 }

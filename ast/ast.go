@@ -3,6 +3,7 @@ package ast
 import (
 	"Pron-Lang/token"
 	"bytes"
+	"fmt"
 	"strings"
 )
 
@@ -112,6 +113,40 @@ func (p *Program) TokenLiteral() string {
 	}
 }
 
+type DirectFunctionStatement struct {
+	Token    token.Token // the 'func' token
+	Name     *Identifier
+	Function FunctionLiteral
+}
+
+func (dfs *DirectFunctionStatement) statementNode()       {}
+func (dfs *DirectFunctionStatement) TokenLiteral() string { return dfs.Token.Literal }
+func (dfs *DirectFunctionStatement) String() string {
+	var out bytes.Buffer
+
+	params := []string{}
+	for _, p := range dfs.Function.Parameters {
+		fmt.Print(p.String())
+		params = append(params, p.String())
+	}
+
+	exps := []string{}
+	for _, e := range dfs.Function.Body.Statements {
+		exps = append(exps, e.String())
+	}
+
+	out.WriteString(dfs.TokenLiteral() + " ")
+	out.WriteString(dfs.Name.String())
+	out.WriteString("(")
+	out.WriteString(strings.Join(params, ", "))
+	out.WriteString(")")
+	out.WriteString("{")
+	out.WriteString(strings.Join(exps, ", "))
+	out.WriteString("}")
+
+	return out.String()
+}
+
 type IntegerLiteral struct {
 	Token token.Token
 	Value int64
@@ -213,7 +248,7 @@ func (bs *BlockStatement) String() string {
 }
 
 type FunctionLiteral struct {
-	Token      token.Token //the 'fn' token
+	Token      token.Token //the 'func' token
 	Parameters []*Identifier
 	Body       *BlockStatement
 }

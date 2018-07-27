@@ -219,9 +219,11 @@ func TestVarStatements(t *testing.T) {
 	}
 }
 
+/*
 func TestFunctionObject(t *testing.T) {
 	input := "func(x) { x + 2; };"
 	evaluated := testEval(input)
+
 	fn, ok := evaluated.(*object.Function)
 	if !ok {
 		t.Fatalf("object is not Function. got=%T (%+v)", evaluated, evaluated)
@@ -254,8 +256,25 @@ func TestFunctionApplication(t *testing.T) {
 	for _, tt := range tests {
 		testIntegerObject(t, testEval(tt.input), tt.expected)
 	}
+}*/
+
+func TestDirectFunctionApplication(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected int64
+	}{
+		{"func identity(x) { x; }; (5)", 5},
+		{"func identity(x) { return x; }; identity(5);", 5},
+		{"func double(x) { x * 2; }; double(5);", 10},
+		{"func add(x, y) { x + y; }; add(5, 5);", 10},
+		{"func add(x, y) { x + y; }; add(5 + 5, add(5, 5));", 20},
+	}
+	for _, tt := range tests {
+		testIntegerObject(t, testEval(tt.input), tt.expected)
+	}
 }
 
+/*
 func TestClosures(t *testing.T) {
 	input := `
 	var newAdder = func(x) {
@@ -264,7 +283,7 @@ func TestClosures(t *testing.T) {
 	var addTwo = newAdder(2);
 	addTwo(2);`
 	testIntegerObject(t, testEval(input), 4)
-}
+}*/
 
 func TestStringLiteral(t *testing.T) {
 	input := `"Hello World!"`

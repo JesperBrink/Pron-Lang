@@ -81,6 +81,15 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 		}
 		env.Set(node.Name.Value, val)
 
+	case *ast.DirectFunctionStatement:
+		var newNode ast.Node
+		newNode = &node.Function
+		val := Eval(newNode, env)
+		if isError(val) {
+			return val
+		}
+		env.Set(node.Name.Value, val)
+
 	// Expressions
 	case *ast.IntegerLiteral:
 		return &object.Integer{Value: node.Value}
@@ -301,7 +310,6 @@ func applyFunction(fn object.Object, args []object.Object) object.Object {
 		extendedEnv := extendedFunctionEnv(fn, args)
 		evaluated := Eval(fn.Body, extendedEnv)
 		return unwrapReturnValue(evaluated)
-
 	case *object.Builtin:
 		return fn.Fn(args...)
 	default:
@@ -317,6 +325,7 @@ func extendedFunctionEnv(function *object.Function, args []object.Object) *objec
 	}
 
 	return env
+
 }
 
 func unwrapReturnValue(obj object.Object) object.Object {

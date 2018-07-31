@@ -105,6 +105,10 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 		return evalPrefixExpression(node.Operator, right)
 
 	case *ast.InfixExpression:
+		if node.Operator == "=" {
+			return evalAssignValueToExistingVariable(node.Left, node.Right, env)
+		}
+
 		left := Eval(node.Left, env)
 		if isError(left) {
 			return left
@@ -113,7 +117,7 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 		if isError(right) {
 			return right
 		}
-		return evalInfixExpression(node.Operator, left, right)
+		return evalInfixExpression(node.Operator, left, right, env)
 
 	case *ast.IfExpression:
 		return evalIfExpression(node, env)
@@ -196,7 +200,7 @@ func evalMinusPrefixOperatorExpression(right object.Object) object.Object {
 	return &object.Integer{Value: -value}
 }
 
-func evalInfixExpression(operator string, left, right object.Object) object.Object {
+func evalInfixExpression(operator string, left, right object.Object, env *object.Environment) object.Object {
 	switch {
 	case left.Type() != right.Type():
 		return newError("type mismatch: %s %s %s", left.Type(), operator, right.Type())
@@ -334,6 +338,17 @@ func unwrapReturnValue(obj object.Object) object.Object {
 	}
 
 	return obj
+}
+
+func evalAssignValueToExistingVariable(left, right ast.Expression, env *object.Environment) object.Object {
+	leftIdentifier, ok := left.(*ast.Identifier)
+	if !ok {
+		return newError("leftside of assignment is not a string. got=%T (%+v)", left, left)
+	}
+
+	val := Eval(right, env)
+	env.Set(leftIdentifier.Value, val)
+	return val
 }
 
 func evalStringInfixExpression(operator string, left, right object.Object) object.Object {

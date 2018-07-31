@@ -985,6 +985,49 @@ func TestIncrementForloopExpression(t *testing.T) {
 	}
 }
 
+func TestChangeValueOfExistingVariable(t *testing.T) {
+	tests := []struct {
+		input              string
+		expectedIdentifier string
+		expectedValue      interface{}
+	}{
+		{"var x = 5; x = 6;", "x", 6},
+		{"var y = true; y = false", "y", false},
+		{"var foobar = y; foobar = x", "foobar", "x"},
+	}
+
+	for _, tt := range tests {
+		l := lexer.New(tt.input)
+		p := New(l)
+		program := p.ParseProgram()
+		checkParserErrors(t, p)
+
+		if len(program.Statements) != 2 {
+			t.Fatalf("program.Statements does not contain 1 statements. got=%d",
+				len(program.Statements))
+		}
+
+		stmt := program.Statements[0]
+		if !testVarStatement(t, stmt, tt.expectedIdentifier) {
+			return
+		}
+
+		expStmt, ok := program.Statements[1].(*ast.ExpressionStatement)
+		if !ok {
+			t.Fatalf("program.Statements[1] was not ExpressionStatement. got=%T", program.Statements[1])
+		}
+
+		infixExp, ok := expStmt.Expression.(*ast.InfixExpression)
+		if !ok {
+			t.Fatalf("expStmt.Expression is not *ast.InfixExpression. got=%T", expStmt.Expression)
+		}
+
+		if !testInfixExpression(t, infixExp, tt.expectedIdentifier, "=", tt.expectedValue) {
+			return
+		}
+	}
+}
+
 ///////////////////////////////////////////
 //////////// Helper functions /////////////
 ///////////////////////////////////////////

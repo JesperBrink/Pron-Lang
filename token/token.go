@@ -49,6 +49,9 @@ const (
 	IF       = "IF"
 	ELSE     = "ELSE"
 	RETURN   = "RETURN"
+	FOR      = "FOR"
+	FROM     = "FROM"
+	TO       = "TO"
 )
 
 var keywords = map[string]TokenType{
@@ -59,6 +62,9 @@ var keywords = map[string]TokenType{
 	"if":     IF,
 	"else":   ELSE,
 	"return": RETURN,
+	"for":    FOR,
+	"from":   FROM,
+	"to":     TO,
 }
 
 // Returns the TokenType that matches the ident given as argument.

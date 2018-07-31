@@ -508,8 +508,8 @@ func TestIfElseExpression(t *testing.T) {
 	}
 }
 
-/*func TestFunctionLiteralParsing(t *testing.T) {
-	input := `func(x, y) { x + y; }`
+func TestFunctionLiteralParsing(t *testing.T) {
+	input := `var add = func(x, y) { x + y; }`
 
 	l := lexer.New(input)
 	p := New(l)
@@ -520,16 +520,16 @@ func TestIfElseExpression(t *testing.T) {
 		t.Fatalf("program.Body does not contain %d statements. got=%d\n",
 			1, len(program.Statements))
 	}
-	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+	stmt, ok := program.Statements[0].(*ast.VarStatement)
 	if !ok {
-		t.Fatalf("program.Statements[0] is not ast.ExpressionStatement. got=%T",
+		t.Fatalf("program.Statements[0] is not ast.VarStatement. got=%T",
 			program.Statements[0])
 	}
 
-	function, ok := stmt.Expression.(*ast.FunctionLiteral)
+	function, ok := stmt.Value.(*ast.FunctionLiteral)
 	if !ok {
 		t.Fatalf("stmt.Expression is not ast.FunctionLiteral. got=%T",
-			stmt.Expression)
+			stmt.Value)
 	}
 
 	if len(function.Parameters) != 2 {
@@ -559,9 +559,9 @@ func TestFunctionParameterParsing(t *testing.T) {
 		input          string
 		expectedParams []string
 	}{
-		{input: "func() {};", expectedParams: []string{}},
-		{input: "func(x) {};", expectedParams: []string{"x"}},
-		{input: "func(x, y, z) {};", expectedParams: []string{"x", "y", "z"}},
+		{input: "var doNoting = func() {};", expectedParams: []string{}},
+		{input: "var doNoting = func(x) {};", expectedParams: []string{"x"}},
+		{input: "var doNoting = func(x, y, z) {};", expectedParams: []string{"x", "y", "z"}},
 	}
 	for _, tt := range tests {
 		l := lexer.New(tt.input)
@@ -569,8 +569,8 @@ func TestFunctionParameterParsing(t *testing.T) {
 		program := p.ParseProgram()
 		checkParserErrors(t, p)
 
-		stmt := program.Statements[0].(*ast.ExpressionStatement)
-		function := stmt.Expression.(*ast.FunctionLiteral)
+		stmt := program.Statements[0].(*ast.VarStatement)
+		function := stmt.Value.(*ast.FunctionLiteral)
 
 		if len(function.Parameters) != len(tt.expectedParams) {
 			t.Errorf("length parameters wrong. want %d, got=%d\n",
@@ -581,7 +581,7 @@ func TestFunctionParameterParsing(t *testing.T) {
 			testLiteralExpression(t, function.Parameters[i], ident)
 		}
 	}
-}*/
+}
 
 func TestDirectFunctionStatementParsing(t *testing.T) {
 	input := `func add(x, y) { x + y; }`

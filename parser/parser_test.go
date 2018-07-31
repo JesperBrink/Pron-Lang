@@ -620,8 +620,6 @@ func TestDirectFunctionParameterParsing(t *testing.T) {
 		p := New(l)
 		program := p.ParseProgram()
 
-		fmt.Print(program.String())
-
 		checkParserErrors(t, p)
 
 		stmt := program.Statements[0].(*ast.DirectFunctionStatement)
@@ -932,6 +930,58 @@ func TestParsingEmptyHashLiteral(t *testing.T) {
 
 	if len(hash.Pairs) != 0 {
 		t.Errorf("hast.Pairs does not contain 0 elements. contains=%d", len(hash.Pairs))
+	}
+}
+
+func TestIncrementForloopExpression(t *testing.T) {
+	input := `var x = 10; for (i from 0 to x) { i };`
+
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+
+	if len(program.Statements) != 2 {
+		t.Fatalf("program.Statements does not contain %d statements. got=%d\n",
+			1, len(program.Statements))
+	}
+
+	stmt, ok := program.Statements[1].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("program.Statements[0] is not ast.ExpressionStatement. got=%T",
+			program.Statements[1])
+	}
+
+	exp, ok := stmt.Expression.(*ast.IncrementForloopExpression)
+	if !ok {
+		t.Fatalf("stmt.Expression is not ast.IncrementForloopExpression. got=%T", stmt.Expression)
+	}
+
+	if exp.LocalVar.String() != "i" {
+		t.Fatalf("exp.LocalVar is not i. got=%s", exp.LocalVar.String())
+	}
+
+	if exp.From.TokenLiteral() != "0" {
+		t.Fatalf("exp.From is not 0. got=%s", exp.From.TokenLiteral())
+	}
+
+	if exp.To.TokenLiteral() != "x" {
+		t.Fatalf("exp.From is not x. got=%s", exp.To.TokenLiteral())
+	}
+
+	if len(exp.Body.Statements) != 1 {
+		t.Errorf("exp.Body.Statements is not 1 statement. got=%d\n",
+			len(exp.Body.Statements))
+	}
+
+	bodyExp, ok := exp.Body.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("exp.Body.Statements[0] is not ast.ExpressionStatement. got=%T",
+			exp.Body.Statements[0])
+	}
+
+	if !testIdentifier(t, bodyExp.Expression, "i") {
+		return
 	}
 }
 

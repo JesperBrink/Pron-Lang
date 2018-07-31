@@ -365,3 +365,29 @@ func (hl *HashLiteral) String() string {
 
 	return out.String()
 }
+
+type IncrementForloopExpression struct {
+	Token    token.Token // The 'for' token
+	LocalVar Expression
+	From     Expression
+	To       Expression
+	Body     *BlockStatement
+}
+
+func (ic *IncrementForloopExpression) expressionNode()      {}
+func (ic *IncrementForloopExpression) TokenLiteral() string { return ic.Token.Literal }
+func (ic *IncrementForloopExpression) String() string {
+	var out bytes.Buffer
+
+	out.WriteString("for ")
+	out.WriteString(ic.LocalVar.String() + " ")
+	out.WriteString("from ")
+	out.WriteString(ic.From.String() + " ")
+	out.WriteString("to ")
+	out.WriteString(ic.To.String() + " ")
+	out.WriteString("{")
+	out.WriteString(ic.Body.String())
+	out.WriteString("}")
+
+	return out.String()
+}

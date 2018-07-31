@@ -483,6 +483,47 @@ func (p *Parser) parseHashLiteral() ast.Expression {
 	return hash
 }
 
+func (p *Parser) parseForloopExpression() ast.Expression {
+	// TODO: Check which type of forloop it is
+	// - create a forloop interface which they both implement
+	// - check which case by looking after either 'from' or 'in'
+
+	expression := &ast.IncrementForloopExpression{Token: p.curToken}
+
+	if !p.expectPeek(token.LPAREN) {
+		return nil
+	}
+
+	p.nextToken()
+	expression.LocalVar = p.parseIdentifier()
+
+	if !p.expectPeek(token.FROM) {
+		return nil
+	}
+
+	p.nextToken()
+	expression.From = p.parseExpression(LOWEST)
+
+	if !p.expectPeek(token.TO) {
+		return nil
+	}
+
+	p.nextToken()
+	expression.To = p.parseExpression(LOWEST)
+
+	if !p.expectPeek(token.RPAREN) {
+		return nil
+	}
+
+	if !p.expectPeek(token.LBRACE) {
+		return nil
+	}
+
+	expression.Body = p.parseBlockStatement()
+
+	return expression
+}
+
 func New(l *lexer.Lexer) *Parser {
 	p := &Parser{
 		l:      l,
@@ -506,6 +547,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerPrefix(token.STRING, p.parseStringLiteral)
 	p.registerPrefix(token.LBRACKET, p.parseArrayLiteral)
 	p.registerPrefix(token.LBRACE, p.parseHashLiteral)
+	p.registerPrefix(token.FOR, p.parseForloopExpression)
 
 	p.infixParseFns = make(map[token.TokenType]infixParseFn)
 	p.registerInfix(token.PLUS, p.parseInfixExpression)

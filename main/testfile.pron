@@ -15,3 +15,7 @@ puts(hej) puts(lol)
 func sub(x, y) { x - y }
 var resultTwo = sub(5,2)
 puts(resultTwo)
+
+for (i from 0 to 5) {
+    puts(i)
+}

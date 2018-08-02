@@ -485,9 +485,10 @@ func (p *Parser) parseHashLiteral() ast.Expression {
 }
 
 func (p *Parser) parseForloopExpression() ast.Expression {
-	// TODO: Check which type of forloop it is
+	// WHEN IMPLEMENTING For loop for lists:
 	// - create a forloop interface which they both implement
-	// - check which case by looking after either 'from' or 'in'
+	// - check which type of forloop it is
+	// 		- check which case by looking after either 'from' or 'in'
 
 	expression := &ast.IncrementForloopExpression{Token: p.curToken}
 

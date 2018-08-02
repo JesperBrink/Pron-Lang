@@ -121,6 +121,9 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 
 	case *ast.IfExpression:
 		return evalIfExpression(node, env)
+
+	case *ast.IncrementForloopExpression:
+		return evalIncrementForloopExpression(node, env)
 	}
 
 	return nil
@@ -258,6 +261,41 @@ func evalIfExpression(ie *ast.IfExpression, env *object.Environment) object.Obje
 	}
 }
 
+func evalIncrementForloopExpression(incForloopExp *ast.IncrementForloopExpression, env *object.Environment) object.Object {
+	from := Eval(incForloopExp.From, env)
+	if from.Type() != object.INTEGER_OBJ {
+		return newError("'from' expression in forloop was not integer. got=%T", from)
+	}
+
+	to := Eval(incForloopExp.To, env)
+	if to.Type() != object.INTEGER_OBJ {
+		return newError("'to' expression in forloop was not integer. got=%T", to)
+	}
+	to = to.(*object.Integer)
+
+	// create new extended env with local var
+	newEnv := object.NewEnclosedEnvironment(env)
+	newEnv.Set(incForloopExp.LocalVar.String(), from)
+
+	var result object.Object = NULL
+	fromValue := from.(*object.Integer).Value
+	toValue := to.(*object.Integer).Value
+
+	for i := fromValue; i < toValue; i++ {
+		newEnv.Update(incForloopExp.LocalVar.String(), &object.Integer{Value: i})
+		result = evalBlockStatement(incForloopExp.Body, newEnv)
+
+		switch result := result.(type) {
+		case *object.ReturnValue:
+			return result.Value
+		case *object.Error:
+			return result
+		}
+	}
+
+	return result
+}
+
 func isTruthy(obj object.Object) bool {
 	switch obj {
 	case NULL:
@@ -347,7 +385,11 @@ func evalAssignValueToExistingVariable(left, right ast.Expression, env *object.E
 	}
 
 	val := Eval(right, env)
-	env.Set(leftIdentifier.Value, val)
+	// check existens of variables
+	if !env.Update(leftIdentifier.Value, val) {
+		return newError("%s is not defined", leftIdentifier.Value)
+	}
+	//env.Set(leftIdentifier.Value, val)
 	return val
 }
 

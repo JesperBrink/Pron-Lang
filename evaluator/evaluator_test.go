@@ -523,39 +523,86 @@ func TestHashIndexExpressions(t *testing.T) {
 	}
 }
 
-func TestAssingValueToExistingVariable(t *testing.T) {
+func TestAssignValueToExistingVariable(t *testing.T) {
 	tests := []struct {
 		input    string
 		expected int64
 	}{
-		{"var a = 5; a = 6; a;", 6},
-		{"var a = 5; a = a + 1; a", 6},
-		{"var a = 5; var b = a; b = a + a; b", 10},
+		{
+			"var a = 5; a = 6; a;",
+			6,
+		},
+		{
+			"var a = 5; a = a + 1; a",
+			6,
+		},
+		{
+			"var a = 5; var b = a; b = a + a; b",
+			10,
+		},
 	}
 	for _, tt := range tests {
 		testIntegerObject(t, testEval(tt.input), tt.expected)
 	}
 }
 
-/*
 func TestIncrementForloopExpressions(t *testing.T) {
 	tests := []struct {
 		input    string
 		expected interface{}
 	}{
-		{"var x = 0; for (i from 0 to 10) {  }", 10},
+		{
+			"var x = 0; for (i from 0 to 10) { x = x + 1 }; return x;",
+			10,
+		},
+		{
+			"var x = 0; var y = 0; var z = 5; for (i from y to z) { x = x + 1 }; return x;",
+			5,
+		},
+		{
+			"var x = 0; for (i from 0 to 0) { x = x + 1 }; return x;",
+			0,
+		},
+		{
+			"var x = 0; for (i from 0 to 1) { x = x + 1 }; return x;",
+			1,
+		},
+		{
+			"var x = 0; for (i from 0 to -1) { x = x + 1 }; return x;",
+			0,
+		},
+		{
+			"var x = 0; for (i from -5 to -1) { x = x + 1 }; return x;",
+			4,
+		},
+		{
+			"var x = 0; for (i from 0 to 10) { x = i; puts(i)}; return x;",
+			9,
+		},
+		{
+			"var x = 0; for (i from true to 10) { x = i; }; return x;",
+			"'from' expression in forloop was not integer. got=*object.Boolean",
+		},
 	}
-// REWRITE THE TEST CODE BELOW. IT COMES FROM IFEXPRESSION TEST
+
 	for _, tt := range tests {
 		evaluated := testEval(tt.input)
 		integer, ok := tt.expected.(int)
 		if ok {
 			testIntegerObject(t, evaluated, int64(integer))
 		} else {
-			testNullObject(t, evaluated)
+			errObj, ok := evaluated.(*object.Error)
+			expected := tt.expected.(string)
+			if !ok {
+				t.Errorf("object is not Error. got=%T (%+v)", evaluated, evaluated)
+				continue
+			}
+			if errObj.Message != expected {
+				t.Errorf("wrong error message. expected=%q, got=%q", expected, errObj.Message)
+			}
 		}
 	}
-}*/
+}
 
 //////////////////////////////
 ////// Helper functions //////

@@ -8,13 +8,17 @@ if (result > 11) {
     puts("under 11")
 };
 
+
 var hej = "lol" var lol = "hej"
 puts(hej) puts(lol)
 
 
-func sub(x, y) { x - y }
+func sub(x, y) { 
+    x - y
+}
 var resultTwo = sub(5,2)
 puts(resultTwo)
+
 
 for (i from 0 to 5) {
     puts(i)

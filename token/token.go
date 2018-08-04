@@ -52,6 +52,7 @@ const (
 	FOR      = "FOR"
 	FROM     = "FROM"
 	TO       = "TO"
+	IN       = "IN"
 )
 
 var keywords = map[string]TokenType{
@@ -65,6 +66,7 @@ var keywords = map[string]TokenType{
 	"for":    FOR,
 	"from":   FROM,
 	"to":     TO,
+	"in":     IN,
 }
 
 // Returns the TokenType that matches the ident given as argument.

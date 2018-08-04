@@ -485,45 +485,65 @@ func (p *Parser) parseHashLiteral() ast.Expression {
 }
 
 func (p *Parser) parseForloopExpression() ast.Expression {
-	// WHEN IMPLEMENTING For loop for lists:
-	// - create a forloop interface which they both implement
-	// - check which type of forloop it is
-	// 		- check which case by looking after either 'from' or 'in'
-
-	expression := &ast.IncrementForloopExpression{Token: p.curToken}
+	curToken := p.curToken
 
 	if !p.expectPeek(token.LPAREN) {
 		return nil
 	}
 
 	p.nextToken()
-	expression.LocalVar = p.parseIdentifier()
+	localVar := p.parseIdentifier()
 
-	if !p.expectPeek(token.FROM) {
+	if p.peekTokenIs(token.FROM) {
+		// increment forloop
+		expression := &ast.IncrementForloopExpression{Token: curToken, LocalVar: localVar}
+
+		p.nextToken()
+		p.nextToken()
+		expression.From = p.parseExpression(LOWEST)
+
+		if !p.expectPeek(token.TO) {
+			return nil
+		}
+
+		p.nextToken()
+		expression.To = p.parseExpression(LOWEST)
+
+		if !p.expectPeek(token.RPAREN) {
+			return nil
+		}
+
+		if !p.expectPeek(token.LBRACE) {
+			return nil
+		}
+
+		expression.Body = p.parseBlockStatement()
+
+		return expression
+
+	} else if p.peekTokenIs(token.IN) {
+		// array forloop
+		expression := &ast.ArrayForloopExpression{Token: curToken, LocalVar: localVar}
+
+		p.nextToken()
+		p.nextToken()
+		expression.ArrayName = p.parseIdentifier()
+
+		if !p.expectPeek(token.RPAREN) {
+			return nil
+		}
+
+		if !p.expectPeek(token.LBRACE) {
+			return nil
+		}
+
+		expression.Body = p.parseBlockStatement()
+
+		return expression
+	} else {
 		return nil
 	}
 
-	p.nextToken()
-	expression.From = p.parseExpression(LOWEST)
-
-	if !p.expectPeek(token.TO) {
-		return nil
-	}
-
-	p.nextToken()
-	expression.To = p.parseExpression(LOWEST)
-
-	if !p.expectPeek(token.RPAREN) {
-		return nil
-	}
-
-	if !p.expectPeek(token.LBRACE) {
-		return nil
-	}
-
-	expression.Body = p.parseBlockStatement()
-
-	return expression
 }
 
 func New(l *lexer.Lexer) *Parser {

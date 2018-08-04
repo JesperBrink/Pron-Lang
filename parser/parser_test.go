@@ -985,6 +985,54 @@ func TestIncrementForloopExpression(t *testing.T) {
 	}
 }
 
+func TestArrayForloopExpression(t *testing.T) {
+	input := `var myArr = [1,4,2]; for (i in myArr) { i };`
+
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+
+	if len(program.Statements) != 2 {
+		t.Fatalf("program.Statements does not contain %d statements. got=%d\n",
+			1, len(program.Statements))
+	}
+
+	stmt, ok := program.Statements[1].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("program.Statements[0] is not ast.ExpressionStatement. got=%T",
+			program.Statements[1])
+	}
+
+	exp, ok := stmt.Expression.(*ast.ArrayForloopExpression)
+	if !ok {
+		t.Fatalf("stmt.Expression is not ast.ArrayForloopExpression. got=%T", stmt.Expression)
+	}
+
+	if exp.LocalVar.String() != "i" {
+		t.Fatalf("exp.LocalVar is not i. got=%s", exp.LocalVar.String())
+	}
+
+	if exp.ArrayName.String() != "myArr" {
+		t.Fatalf("exp.ArrayName.String() is not myArr. got=%s", exp.ArrayName.String())
+	}
+
+	if len(exp.Body.Statements) != 1 {
+		t.Errorf("exp.Body.Statements is not 1 statement. got=%d\n",
+			len(exp.Body.Statements))
+	}
+
+	bodyExp, ok := exp.Body.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("exp.Body.Statements[0] is not ast.ExpressionStatement. got=%T",
+			exp.Body.Statements[0])
+	}
+
+	if !testIdentifier(t, bodyExp.Expression, "i") {
+		return
+	}
+}
+
 func TestChangeValueOfExistingVariable(t *testing.T) {
 	tests := []struct {
 		input              string

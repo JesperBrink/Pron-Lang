@@ -380,13 +380,36 @@ func (ic *IncrementForloopExpression) String() string {
 	var out bytes.Buffer
 
 	out.WriteString("for ")
-	out.WriteString(ic.LocalVar.String() + " ")
+	out.WriteString("( " + ic.LocalVar.String() + " ")
 	out.WriteString("from ")
 	out.WriteString(ic.From.String() + " ")
 	out.WriteString("to ")
-	out.WriteString(ic.To.String() + " ")
+	out.WriteString(ic.To.String() + " ) ")
 	out.WriteString("{")
 	out.WriteString(ic.Body.String())
+	out.WriteString("}")
+
+	return out.String()
+}
+
+type ArrayForloopExpression struct {
+	Token     token.Token // The 'for' token
+	LocalVar  Expression
+	ArrayName Expression
+	Body      *BlockStatement
+}
+
+func (af *ArrayForloopExpression) expressionNode()      {}
+func (af *ArrayForloopExpression) TokenLiteral() string { return af.Token.Literal }
+func (af *ArrayForloopExpression) String() string {
+	var out bytes.Buffer
+
+	out.WriteString("for ")
+	out.WriteString("( " + af.LocalVar.String() + " ")
+	out.WriteString("in ")
+	out.WriteString(af.ArrayName.String() + " ) ")
+	out.WriteString("{")
+	out.WriteString(af.Body.String())
 	out.WriteString("}")
 
 	return out.String()

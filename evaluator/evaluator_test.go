@@ -569,7 +569,7 @@ func TestIncrementForloopExpressions(t *testing.T) {
 		},
 		{
 			"var x = 0; for (i from 0 to -1) { x = x + 1 }; return x;",
-			0,
+			1,
 		},
 		{
 			"var x = 0; for (i from -5 to -1) { x = x + 1 }; return x;",
@@ -578,6 +578,70 @@ func TestIncrementForloopExpressions(t *testing.T) {
 		{
 			"var x = 0; for (i from 0 to 10) { x = i; puts(i)}; return x;",
 			9,
+		},
+		{
+			"for (i from 4 to 9) { return i };",
+			4,
+		},
+		{
+			"var x = 0; for (i from 3 to 0) { x = x + i }; return x",
+			6,
+		},
+		{
+			"var x = 0; for (i from 4 to -4) { x = x + i }; return x",
+			4,
+		},
+		{
+			"var x = 0; for (i from true to 10) { x = i; }; return x;",
+			"'from' expression in forloop was not integer. got=*object.Boolean",
+		},
+		{
+			"for (i from 0 to 0) { return i };",
+			nil,
+		},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(tt.input)
+		integer, ok := tt.expected.(int)
+		if ok {
+			testIntegerObject(t, evaluated, int64(integer))
+		} else if _, ok := tt.expected.(string); ok {
+			errObj, ok := evaluated.(*object.Error)
+			expected := tt.expected.(string)
+			if !ok {
+				t.Errorf("object is not Error. got=%T (%+v)", evaluated, evaluated)
+				continue
+			}
+			if errObj.Message != expected {
+				t.Errorf("wrong error message. expected=%q, got=%q", expected, errObj.Message)
+			}
+		} else {
+			testNullObject(t, evaluated)
+		}
+	}
+}
+
+func TestArrayForloopExpressions(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{
+			"var x = [6]; for (i in x) { return i };",
+			6,
+		},
+		{
+			"var x = [1,2,5,3]; var sum = 0; for (i in x) { sum = sum + i }; return sum",
+			11,
+		},
+		{
+			"var x = []; for (i in x) { return i };",
+			nil,
+		},
+		{
+			"var x = [1,4,2]; for (i in x) { return i };",
+			1,
 		},
 		{
 			"var x = 0; for (i from true to 10) { x = i; }; return x;",
@@ -590,7 +654,7 @@ func TestIncrementForloopExpressions(t *testing.T) {
 		integer, ok := tt.expected.(int)
 		if ok {
 			testIntegerObject(t, evaluated, int64(integer))
-		} else {
+		} else if _, ok := tt.expected.(string); ok {
 			errObj, ok := evaluated.(*object.Error)
 			expected := tt.expected.(string)
 			if !ok {
@@ -600,6 +664,8 @@ func TestIncrementForloopExpressions(t *testing.T) {
 			if errObj.Message != expected {
 				t.Errorf("wrong error message. expected=%q, got=%q", expected, errObj.Message)
 			}
+		} else {
+			testNullObject(t, evaluated)
 		}
 	}
 }

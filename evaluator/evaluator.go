@@ -124,6 +124,9 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 
 	case *ast.IncrementForloopExpression:
 		return evalIncrementForloopExpression(node, env)
+
+	case *ast.ArrayForloopExpression:
+		return evalArrayForloopExpression(node, env)
 	}
 
 	return nil
@@ -271,19 +274,59 @@ func evalIncrementForloopExpression(incForloopExp *ast.IncrementForloopExpressio
 	if to.Type() != object.INTEGER_OBJ {
 		return newError("'to' expression in forloop was not integer. got=%T", to)
 	}
-	to = to.(*object.Integer)
 
 	// create new extended env with local var
 	newEnv := object.NewEnclosedEnvironment(env)
-	newEnv.Set(incForloopExp.LocalVar.String(), from)
+	newEnv.Set(incForloopExp.LocalVar.String(), NULL)
 
 	var result object.Object = NULL
 	fromValue := from.(*object.Integer).Value
 	toValue := to.(*object.Integer).Value
 
-	for i := fromValue; i < toValue; i++ {
-		newEnv.Update(incForloopExp.LocalVar.String(), &object.Integer{Value: i})
-		result = evalBlockStatement(incForloopExp.Body, newEnv)
+	if fromValue < toValue {
+		for i := fromValue; i < toValue; i++ {
+			newEnv.Update(incForloopExp.LocalVar.String(), &object.Integer{Value: i})
+			result = evalBlockStatement(incForloopExp.Body, newEnv)
+
+			switch result := result.(type) {
+			case *object.ReturnValue:
+				return result.Value
+			case *object.Error:
+				return result
+			}
+		}
+	} else {
+		for i := fromValue; i > toValue; i-- {
+			newEnv.Update(incForloopExp.LocalVar.String(), &object.Integer{Value: i})
+			result = evalBlockStatement(incForloopExp.Body, newEnv)
+
+			switch result := result.(type) {
+			case *object.ReturnValue:
+				return result.Value
+			case *object.Error:
+				return result
+			}
+		}
+	}
+	return result
+}
+
+func evalArrayForloopExpression(arrayForloopExp *ast.ArrayForloopExpression, env *object.Environment) object.Object {
+	array, ok := env.Get(arrayForloopExp.ArrayName.String())
+	if !ok {
+		return newError("%s is not defined", arrayForloopExp.ArrayName.String())
+	}
+	arrayObject := array.(*object.Array)
+
+	// create new extended env with local var
+	newEnv := object.NewEnclosedEnvironment(env)
+	newEnv.Set(arrayForloopExp.LocalVar.String(), NULL)
+
+	var result object.Object = NULL
+
+	for _, elem := range arrayObject.Elements {
+		newEnv.Update(arrayForloopExp.LocalVar.String(), elem)
+		result = evalBlockStatement(arrayForloopExp.Body, newEnv)
 
 		switch result := result.(type) {
 		case *object.ReturnValue:

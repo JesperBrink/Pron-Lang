@@ -28,9 +28,12 @@ func TestNextToken(t *testing.T) {
 		10 != 9;
 		"foobar"
 		"foo bar"
-		[1, 2];
+		var myList = [1, 2];
 		{"foo": "bar"}
-		for i from 0 to x {
+		for (i from 0 to x) {
+			puts(i)
+		}
+		for (i in myList) {
 			puts(i)
 		}
 		`
@@ -114,6 +117,9 @@ func TestNextToken(t *testing.T) {
 		{token.SEMICOLON, ";"},
 		{token.STRING, "foobar"},
 		{token.STRING, "foo bar"},
+		{token.VAR, "var"},
+		{token.IDENT, "myList"},
+		{token.ASSIGN, "="},
 		{token.LBRACKET, "["},
 		{token.INT, "1"},
 		{token.COMMA, ","},
@@ -126,11 +132,25 @@ func TestNextToken(t *testing.T) {
 		{token.STRING, "bar"},
 		{token.RBRACE, "}"},
 		{token.FOR, "for"},
+		{token.LPAREN, "("},
 		{token.IDENT, "i"},
 		{token.FROM, "from"},
 		{token.INT, "0"},
 		{token.TO, "to"},
 		{token.IDENT, "x"},
+		{token.RPAREN, ")"},
+		{token.LBRACE, "{"},
+		{token.IDENT, "puts"},
+		{token.LPAREN, "("},
+		{token.IDENT, "i"},
+		{token.RPAREN, ")"},
+		{token.RBRACE, "}"},
+		{token.FOR, "for"},
+		{token.LPAREN, "("},
+		{token.IDENT, "i"},
+		{token.IN, "in"},
+		{token.IDENT, "myList"},
+		{token.RPAREN, ")"},
 		{token.LBRACE, "{"},
 		{token.IDENT, "puts"},
 		{token.LPAREN, "("},

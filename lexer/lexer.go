@@ -112,10 +112,14 @@ func (l *Lexer) NextToken() token.Token {
 // Returns the identifier that the Lexer is currently looking at
 func (l *Lexer) readIdentifier() string {
 	position := l.position
-	for isLetter(l.ch) {
+	for isLetterOrDigit(l.ch) { // isLetter(l.ch)
 		l.readChar()
 	}
 	return l.input[position:l.position]
+}
+
+func isLetterOrDigit(ch byte) bool {
+	return isLetter(ch) || isDigit(ch)
 }
 
 // Checks is the byte is a letter in the english alphabet

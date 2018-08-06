@@ -309,14 +309,15 @@ func (p *Parser) parseGroupedExpression() ast.Expression {
 }
 
 func (p *Parser) parseIfExpression() ast.Expression {
-	expression := &ast.IfExpression{Token: p.curToken}
+	ifToken := p.curToken
 
 	if !p.expectPeek(token.LPAREN) {
 		return nil
 	}
 
 	p.nextToken()
-	expression.Condition = p.parseExpression(LOWEST)
+
+	firstCondition := p.parseExpression(LOWEST)
 
 	if !p.expectPeek(token.RPAREN) {
 		return nil
@@ -326,9 +327,12 @@ func (p *Parser) parseIfExpression() ast.Expression {
 		return nil
 	}
 
-	expression.Consequence = p.parseBlockStatement()
+	firstConsequence := p.parseBlockStatement()
 
 	if p.peekTokenIs(token.ELSE) {
+		// Else statement
+		expression := &ast.IfExpression{Token: p.curToken,
+			Condition: firstCondition, Consequence: firstConsequence}
 		p.nextToken()
 
 		if !p.expectPeek(token.LBRACE) {
@@ -336,9 +340,69 @@ func (p *Parser) parseIfExpression() ast.Expression {
 		}
 
 		expression.Alternative = p.parseBlockStatement()
-	}
 
-	return expression
+		return expression
+
+	} else if p.peekTokenIs(token.ELIF) {
+		// Elif statement
+		expression := &ast.ElseIfExpression{Token: p.curToken}
+		conditionAndBlockstatements := []*ast.ConditionAndBlockstatementExpression{}
+
+		p.nextToken()
+
+		// add the 'if'
+		firstConditionAndBlockstatement := &ast.ConditionAndBlockstatementExpression{Token: ifToken,
+			Condition: firstCondition, Consequence: firstConsequence}
+		conditionAndBlockstatements = append(conditionAndBlockstatements, firstConditionAndBlockstatement)
+
+		// add all the 'elif'
+		for {
+			conditionAndBlockstatement := &ast.ConditionAndBlockstatementExpression{Token: p.curToken}
+
+			if !p.expectPeek(token.LPAREN) {
+				return nil
+			}
+
+			p.nextToken()
+
+			conditionAndBlockstatement.Condition = p.parseExpression(LOWEST)
+
+			if !p.expectPeek(token.RPAREN) {
+				return nil
+			}
+
+			if !p.expectPeek(token.LBRACE) {
+				return nil
+			}
+
+			conditionAndBlockstatement.Consequence = p.parseBlockStatement()
+
+			// add the conditionAndBlockstatement to the list
+			conditionAndBlockstatements = append(conditionAndBlockstatements, conditionAndBlockstatement)
+
+			if p.peekTokenIs(token.ELSE) {
+				// This was the last 'elif', but there is an Else left
+				p.nextToken()
+
+				if !p.expectPeek(token.LBRACE) {
+					return nil
+				}
+
+				expression.Alternative = p.parseBlockStatement()
+				expression.ConditionAndBlockstatementList = conditionAndBlockstatements
+				return expression
+			} else if p.peekTokenIs(token.ELIF) {
+				p.nextToken()
+			} else {
+				break
+			}
+		}
+		expression.ConditionAndBlockstatementList = conditionAndBlockstatements
+		return expression
+	} else {
+		// return simple 'if' without 'else if' or 'else'
+		return &ast.IfExpression{Token: p.curToken, Condition: firstCondition, Consequence: firstConsequence}
+	}
 }
 
 func (p *Parser) parseBlockStatement() *ast.BlockStatement {

@@ -230,6 +230,59 @@ func (ie *IfExpression) String() string {
 	return out.String()
 }
 
+type ElseIfExpression struct {
+	Token                          token.Token
+	ConditionAndBlockstatementList []*ConditionAndBlockstatementExpression
+	Alternative                    *BlockStatement
+}
+
+func (ei *ElseIfExpression) expressionNode()      {}
+func (ei *ElseIfExpression) TokenLiteral() string { return ei.Token.Literal }
+func (ei *ElseIfExpression) String() string {
+	var out bytes.Buffer
+
+	elifs := []string{}
+	for _, elif := range ei.ConditionAndBlockstatementList[1:] {
+		printStr := elif.String()
+		elifs = append(elifs, printStr)
+	}
+
+	out.WriteString("if (")
+	out.WriteString(ei.ConditionAndBlockstatementList[0].Condition.String())
+	out.WriteString(") {")
+	out.WriteString(ei.ConditionAndBlockstatementList[0].Consequence.String())
+	out.WriteString("}")
+	out.WriteString(strings.Join(elifs, "\n"))
+
+	if ei.Alternative != nil {
+		out.WriteString("else {")
+		out.WriteString(ei.Alternative.String())
+		out.WriteString("}")
+	}
+
+	return out.String()
+}
+
+type ConditionAndBlockstatementExpression struct {
+	Token       token.Token
+	Condition   Expression
+	Consequence *BlockStatement
+}
+
+func (cb *ConditionAndBlockstatementExpression) expressionNode()      {}
+func (cb *ConditionAndBlockstatementExpression) TokenLiteral() string { return cb.Token.Literal }
+func (cb *ConditionAndBlockstatementExpression) String() string {
+	var out bytes.Buffer
+
+	out.WriteString("elif (")
+	out.WriteString(cb.Condition.String())
+	out.WriteString(") {")
+	out.WriteString(cb.Consequence.String())
+	out.WriteString("}")
+
+	return out.String()
+}
+
 type BlockStatement struct {
 	Token      token.Token //The  { token
 	Statements []Statement

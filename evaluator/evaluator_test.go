@@ -110,6 +110,31 @@ func TestIfElseExpressions(t *testing.T) {
 	}
 }
 
+func TestElifExpressions(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{"if (true) { 10 } elif (false) { 9 }", 10},
+		{"if (false) { 10 } elif (true) { 9 }", 9},
+		{"if (false) { 10 } elif (true) { 9 } elif (false) { 8 }", 9},
+		{"if (false) { 10 } elif (false) { 9 } elif (true) { 8 }", 8},
+		{"if (true) { 10 } elif (true) { 9 } elif (true) { 8 }", 10},
+		{"if (false) { 10 } elif (false) { 9 }", nil},
+		{"if (false) { 10 } elif (false) { 9 } else { 7 }", 7},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(tt.input)
+		integer, ok := tt.expected.(int)
+		if ok {
+			testIntegerObject(t, evaluated, int64(integer))
+		} else {
+			testNullObject(t, evaluated)
+		}
+	}
+}
+
 func TestReturnStatements(t *testing.T) {
 	tests := []struct {
 		input    string

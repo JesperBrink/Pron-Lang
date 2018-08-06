@@ -122,6 +122,9 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 	case *ast.IfExpression:
 		return evalIfExpression(node, env)
 
+	case *ast.ElseIfExpression:
+		return evalElseIfExpression(node, env)
+
 	case *ast.IncrementForloopExpression:
 		return evalIncrementForloopExpression(node, env)
 
@@ -262,6 +265,26 @@ func evalIfExpression(ie *ast.IfExpression, env *object.Environment) object.Obje
 	} else {
 		return NULL
 	}
+}
+
+func evalElseIfExpression(ei *ast.ElseIfExpression, env *object.Environment) object.Object {
+	for _, conditionAndBlockstatement := range ei.ConditionAndBlockstatementList {
+		condition := Eval(conditionAndBlockstatement.Condition, env)
+		if isError(condition) {
+			return condition
+		}
+
+		if isTruthy(condition) {
+			return Eval(conditionAndBlockstatement.Consequence, env)
+		}
+	}
+
+	if ei.Alternative != nil {
+		return Eval(ei.Alternative, env)
+	} else {
+		return NULL
+	}
+
 }
 
 func evalIncrementForloopExpression(incForloopExp *ast.IncrementForloopExpression, env *object.Environment) object.Object {

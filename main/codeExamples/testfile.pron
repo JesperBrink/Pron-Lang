@@ -4,8 +4,10 @@ var result = add(2,8)
 
 if (result > 11) {
     puts("over 11")
+} elif (result == 10) {
+    puts("exactly 10")
 } else {
-    puts("under 11")
+    puts("under 10")
 };
 
 

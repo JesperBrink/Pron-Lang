@@ -508,6 +508,103 @@ func TestIfElseExpression(t *testing.T) {
 	}
 }
 
+func TestElifExpression(t *testing.T) {
+	input := `if (x < y) { x } elif (x > y) { y } elif (x == y) { 10 } else { z } `
+
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+
+	if len(program.Statements) != 1 {
+		t.Fatalf("program.Statements does not contain %d statements. got=%d\n",
+			1, len(program.Statements))
+	}
+
+	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("program.Statements[0] is not ast.ExpressionStatement. got=%T",
+			program.Statements[0])
+	}
+
+	exp, ok := stmt.Expression.(*ast.ElseIfExpression)
+	if !ok {
+		t.Fatalf("stmt.Expression is not ast.ElseIfExpression. got=%T", stmt.Expression)
+	}
+
+	if !testInfixExpression(t, exp.ConditionAndBlockstatementList[0].Condition, "x", "<", "y") {
+		return
+	}
+
+	if len(exp.ConditionAndBlockstatementList[0].Consequence.Statements) != 1 {
+		t.Errorf("exp.ConditionAndBlockstatementList[0].Consequence.Statements is not 1 statement. got=%d\n",
+			len(exp.ConditionAndBlockstatementList[0].Consequence.Statements))
+	}
+
+	consequence, ok := exp.ConditionAndBlockstatementList[0].Consequence.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("exp.Consequence.Statements[0] is not ast.ExpressionStatement. got=%T",
+			exp.ConditionAndBlockstatementList[0].Consequence.Statements[0])
+	}
+
+	if !testIdentifier(t, consequence.Expression, "x") {
+		return
+	}
+
+	if !testInfixExpression(t, exp.ConditionAndBlockstatementList[1].Condition, "x", ">", "y") {
+		return
+	}
+
+	if len(exp.ConditionAndBlockstatementList[1].Consequence.Statements) != 1 {
+		t.Errorf("exp.ConditionAndBlockstatementList[1].Consequence.Statements is not 1 statement. got=%d\n",
+			len(exp.ConditionAndBlockstatementList[1].Consequence.Statements))
+	}
+
+	consequence, ok = exp.ConditionAndBlockstatementList[1].Consequence.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("exp.Consequence.Statements[1] is not ast.ExpressionStatement. got=%T",
+			exp.ConditionAndBlockstatementList[1].Consequence.Statements[0])
+	}
+
+	if !testIdentifier(t, consequence.Expression, "y") {
+		return
+	}
+
+	if !testInfixExpression(t, exp.ConditionAndBlockstatementList[2].Condition, "x", "==", "y") {
+		return
+	}
+
+	if len(exp.ConditionAndBlockstatementList[2].Consequence.Statements) != 1 {
+		t.Errorf("exp.ConditionAndBlockstatementList[2].Consequence.Statements is not 1 statement. got=%d\n",
+			len(exp.ConditionAndBlockstatementList[2].Consequence.Statements))
+	}
+
+	consequence, ok = exp.ConditionAndBlockstatementList[2].Consequence.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("exp.Consequence.Statements[2] is not ast.ExpressionStatement. got=%T",
+			exp.ConditionAndBlockstatementList[2].Consequence.Statements[0])
+	}
+
+	if !testIntegerLiteral(t, consequence.Expression, 10) {
+		return
+	}
+
+	if len(exp.Alternative.Statements) != 1 {
+		t.Errorf("exp.Alternative.Statements is not 1 statement. got=%d\n",
+			len(exp.Alternative.Statements))
+	}
+
+	alternative, ok := exp.Alternative.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("exp.Alternative.Statements[0] is not ast.ExpressionStatement. got=%T",
+			exp.Alternative.Statements[0])
+	}
+
+	if !testIdentifier(t, alternative.Expression, "z") {
+		return
+	}
+}
+
 func TestFunctionLiteralParsing(t *testing.T) {
 	input := `var add = func(x, y) { x + y; }`
 

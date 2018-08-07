@@ -516,3 +516,26 @@ func (af *ArrayForloopExpression) String() string {
 
 	return out.String()
 }
+
+type ObjectInitialization struct {
+	Token     token.Token // the 'new' token
+	Name      *Identifier
+	Arguments []Expression
+}
+
+func (oi *ObjectInitialization) expressionNode()      {}
+func (oi *ObjectInitialization) TokenLiteral() string { return oi.Token.Literal }
+func (oi *ObjectInitialization) String() string {
+	var out bytes.Buffer
+
+	args := []string{}
+	for _, arg := range oi.Arguments {
+		args = append(args, arg.String())
+	}
+
+	out.WriteString("new " + oi.Name.Value + "(")
+	out.WriteString(strings.Join(args, ", "))
+	out.WriteString(")")
+
+	return out.String()
+}

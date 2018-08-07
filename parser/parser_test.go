@@ -1258,6 +1258,54 @@ func TestClassStatementParsing(t *testing.T) {
 	}
 }
 
+func TestClassInitializationParsing(t *testing.T) {
+	input := `new Person("Hans", 10)`
+
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+
+	if len(program.Statements) != 1 {
+		t.Fatalf("program.Statements does not contain %d statements. got=%d\n",
+			1, len(program.Statements))
+	}
+
+	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("program.Statements[0] is not ast.ExpressionStatement. got=%T",
+			program.Statements[0])
+	}
+
+	objectInitExp, ok := stmt.Expression.(*ast.ObjectInitialization)
+	if !ok {
+		t.Fatalf("exp not *ast.ObjectInitialization. got=%T", stmt.Expression)
+	}
+
+	if objectInitExp.Name.Value != "Person" {
+		t.Errorf("objectInitExp.Name is not 'Person'. got=%s", objectInitExp.Name.Value)
+	}
+
+	strArg, ok := objectInitExp.Arguments[0].(*ast.StringLiteral)
+	if !ok {
+		t.Errorf("strArg is not *ast.Identifier. got=%T", objectInitExp.Arguments[0])
+	}
+
+	if strArg.Value != "Hans" {
+		t.Errorf("strArg.Value is not 'Person'. got=%s", strArg.Value)
+	}
+
+	intArg, ok := objectInitExp.Arguments[1].(*ast.IntegerLiteral)
+	if !ok {
+		t.Errorf("objectInitExp.Arguments[1] is not *ast.IntegerLiteral. got=%T",
+			objectInitExp.Arguments[1])
+	}
+
+	if intArg.Value != 10 {
+		t.Errorf("intArg.Value is not 10. got=%d", intArg.Value)
+	}
+}
+
 ///////////////////////////////////////////
 //////////// Helper functions /////////////
 ///////////////////////////////////////////

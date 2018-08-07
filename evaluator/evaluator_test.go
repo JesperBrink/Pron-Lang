@@ -792,6 +792,108 @@ func TestClassObject(t *testing.T) {
 	}
 }
 
+func TestObjectInitializationWithParameters(t *testing.T) {
+	input := `
+	class Person {
+		var name = ""
+		var age = 0
+
+		init(n, this.age) {
+			name = n
+		}
+
+		func getName(dummyParam) {
+			return name
+		}
+	}
+	var p = new Person("Hans", 10)
+	return p
+	`
+
+	evaluated := testEval(input)
+	result, ok := evaluated.(*object.ClassInstance)
+	if !ok {
+		t.Fatalf("Eval didn't return ClassInstance. got=%T (%+v)", evaluated, evaluated)
+	}
+
+	if result.Name != "Person" {
+		t.Errorf("result.Name is not Person. got=%s", result.Name)
+	}
+
+	env := result.Env
+
+	// Check fields
+	nameField, ok := env.Get("name")
+	if !ok {
+		t.Errorf("'name' is not in the env of Person")
+	}
+
+	nameStr, ok := nameField.(*object.String)
+	if !ok {
+		t.Errorf("'name' is not of type string. got=%T", nameField)
+	}
+
+	if nameStr.Value != "Hans" {
+		t.Errorf("nameStr is not 'Hans'. got=%s", nameStr.Value)
+	}
+
+	ageField, ok := env.Get("age")
+	if !ok {
+		t.Errorf("'age' is not in the env of Person")
+	}
+
+	testIntegerObject(t, ageField, 10)
+}
+
+func TestObjectInitializationWithoutParameters(t *testing.T) {
+	input := `
+	class Person {
+		var name = ""
+		var age = 0
+
+		func getName(dummyParam) {
+			return name
+		}
+	}
+	var p = new Person()
+	return p
+	`
+
+	evaluated := testEval(input)
+	result, ok := evaluated.(*object.ClassInstance)
+	if !ok {
+		t.Fatalf("Eval didn't return ClassInstance. got=%T (%+v)", evaluated, evaluated)
+	}
+
+	if result.Name != "Person" {
+		t.Errorf("result.Name is not Person. got=%s", result.Name)
+	}
+
+	env := result.Env
+
+	// Check fields
+	nameField, ok := env.Get("name")
+	if !ok {
+		t.Errorf("'name' is not in the env of Person")
+	}
+
+	nameStr, ok := nameField.(*object.String)
+	if !ok {
+		t.Errorf("'name' is not of type string. got=%T", nameField)
+	}
+
+	if nameStr.Value != "" {
+		t.Errorf("nameStr is not 'name'. got=%s", nameStr.Value)
+	}
+
+	ageField, ok := env.Get("age")
+	if !ok {
+		t.Errorf("'age' is not in the env of Person")
+	}
+
+	testIntegerObject(t, ageField, 0)
+}
+
 //////////////////////////////
 ////// Helper functions //////
 //////////////////////////////

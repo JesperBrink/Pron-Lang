@@ -37,3 +37,17 @@ var myArr = [1, 4, 2, "hej"]
 for (elem in myArr) {
     puts(elem)
 }
+
+class Person {
+    var age = 0
+    var kilo = 0
+
+    init(name, this.age, this.kilo) {
+        puts(name)
+        puts(age)
+        puts(kilo)
+    }
+}
+
+new Person("Ole", 24, 50)
+new Person("Lars", 35, 55)

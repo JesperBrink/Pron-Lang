@@ -703,7 +703,22 @@ func (p *Parser) parseForloopExpression() ast.Expression {
 	} else {
 		return nil
 	}
+}
 
+func (p *Parser) parseObjectInitialization() ast.Expression {
+	objectInitialiation := &ast.ObjectInitialization{Token: p.curToken}
+
+	p.nextToken()
+
+	objectInitialiation.Name = p.parseIdentifier().(*ast.Identifier)
+
+	if !p.expectPeek(token.LPAREN) {
+		return nil
+	}
+
+	objectInitialiation.Arguments = p.parseExpressionList(token.RPAREN)
+
+	return objectInitialiation
 }
 
 func New(l *lexer.Lexer) *Parser {
@@ -730,6 +745,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerPrefix(token.LBRACKET, p.parseArrayLiteral)
 	p.registerPrefix(token.LBRACE, p.parseHashLiteral)
 	p.registerPrefix(token.FOR, p.parseForloopExpression)
+	p.registerPrefix(token.NEW, p.parseObjectInitialization)
 
 	p.infixParseFns = make(map[token.TokenType]infixParseFn)
 	p.registerInfix(token.PLUS, p.parseInfixExpression)

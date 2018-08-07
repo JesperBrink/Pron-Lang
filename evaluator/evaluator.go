@@ -133,6 +133,9 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 
 	case *ast.ArrayForloopExpression:
 		return evalArrayForloopExpression(node, env)
+
+	case *ast.ObjectInitialization:
+		return evalObjectInitialization(node, env)
 	}
 
 	return nil
@@ -153,6 +156,39 @@ func evalProgram(program *ast.Program, env *object.Environment) object.Object {
 	}
 
 	return result
+}
+
+func evalObjectInitialization(node *ast.ObjectInitialization, env *object.Environment) object.Object {
+	classInstanceObject, ok := env.Get(node.Name.Value)
+	if !ok {
+		return newError("There is no Class called: " + node.Name.Value)
+	}
+	classInstance := classInstanceObject.(*object.ClassInstance)
+
+	initFunctionObject, ok := classInstance.Env.Get("init")
+	if !ok {
+		return classInstance
+	}
+	initFunction := initFunctionObject.(*object.InitFunction)
+
+	args := node.Arguments
+
+	// Create env with all arguments that isn't a 'this.' argument
+	newEnv := object.NewEnclosedEnvironment(initFunction.Env)
+
+	for paramIdx, param := range initFunction.Parameters {
+		if param.IsThisParam {
+			val := Eval(args[paramIdx], classInstance.Env)
+			classInstance.Env.Update(param.Parameter.Value, val)
+		} else {
+			val := Eval(args[paramIdx], newEnv)
+			newEnv.Set(param.Parameter.Value, val)
+		}
+
+	}
+
+	Eval(initFunction.Body, newEnv)
+	return classInstance
 }
 
 func evalClassStatement(node *ast.ClassStatement, env *object.Environment) object.Object {
@@ -179,12 +215,18 @@ func evalClassStatement(node *ast.ClassStatement, env *object.Environment) objec
 		classEnv.Set(function.Name.Value, val)
 	}
 
+	var initFunction object.Object
+
 	// Eval init
-	initFunction := &object.InitFunction{Parameters: node.InitParams, Body: node.InitBody, Env: classEnv}
-	classEnv.Set("init", initFunction)
+	if node.InitBody != nil {
+		initFunction = &object.InitFunction{Parameters: node.InitParams, Body: node.InitBody, Env: classEnv}
+		classEnv.Set("init", initFunction)
+	}
 
 	// Put class into global env
-	return &object.ClassInstance{Name: node.Name.Value, Env: classEnv}
+	result := &object.ClassInstance{Name: node.Name.Value, Env: classEnv}
+	env.Set(result.Name, result)
+	return result
 }
 
 func evalBlockStatement(block *ast.BlockStatement, env *object.Environment) object.Object {

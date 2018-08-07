@@ -39,6 +39,12 @@ func TestNextToken(t *testing.T) {
 		for (i in myList) {
 			puts(i)
 		}
+
+		class Person {
+			init() {
+				puts("Initialized")
+			}
+		}
 		`
 
 	tests := []struct {
@@ -175,6 +181,19 @@ func TestNextToken(t *testing.T) {
 		{token.LPAREN, "("},
 		{token.IDENT, "i"},
 		{token.RPAREN, ")"},
+		{token.RBRACE, "}"},
+		{token.CLASS, "class"},
+		{token.IDENT, "Person"},
+		{token.LBRACE, "{"},
+		{token.INIT, "init"},
+		{token.LPAREN, "("},
+		{token.RPAREN, ")"},
+		{token.LBRACE, "{"},
+		{token.IDENT, "puts"},
+		{token.LPAREN, "("},
+		{token.STRING, "Initialized"},
+		{token.RPAREN, ")"},
+		{token.RBRACE, "}"},
 		{token.RBRACE, "}"},
 		{token.EOF, ""},
 	}

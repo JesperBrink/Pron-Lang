@@ -54,6 +54,8 @@ const (
 	FROM     = "FROM"
 	TO       = "TO"
 	IN       = "IN"
+	CLASS    = "CLASS"
+	INIT     = "INIT"
 )
 
 var keywords = map[string]TokenType{
@@ -69,6 +71,8 @@ var keywords = map[string]TokenType{
 	"from":   FROM,
 	"to":     TO,
 	"in":     IN,
+	"class":  CLASS,
+	"init":   INIT,
 }
 
 // Returns the TokenType that matches the ident given as argument.

@@ -61,6 +61,56 @@ func (ls *VarStatement) String() string {
 	return out.String()
 }
 
+type ClassStatement struct {
+	Token        token.Token // the token.Class token
+	Name         *Identifier
+	Fields       []*VarStatement
+	Functions    []*DirectFunctionStatement
+	InitParams   []*InitParam
+	InitFunction *BlockStatement
+}
+
+func (cs *ClassStatement) statementNode()       {}
+func (cs *ClassStatement) TokenLiteral() string { return cs.Token.Literal }
+func (cs *ClassStatement) String() string {
+	var out bytes.Buffer
+
+	fields := []string{}
+	for _, field := range cs.Fields {
+		fields = append(fields, "var "+field.Name.Value+" = "+field.Value.String())
+	}
+
+	params := []string{}
+	for _, param := range cs.InitParams {
+		params = append(params, param.Parameter.String())
+	}
+
+	functions := []string{}
+	for _, function := range cs.Functions {
+		params = append(functions, function.String())
+	}
+
+	out.WriteString("class " + cs.Name.Value + " {")
+	out.WriteString(strings.Join(fields, "\n"))
+	out.WriteString("init(" + strings.Join(params, ", ") + ") {")
+	out.WriteString(cs.InitFunction.String())
+	out.WriteString("}")
+	out.WriteString(strings.Join(functions, "\n"))
+	out.WriteString("}")
+
+	return out.String()
+}
+
+type InitParam struct {
+	Token       token.Token
+	Parameter   *Identifier
+	IsThisParam bool // true if it is a 'this.paramName'
+}
+
+func (ip *InitParam) expressionNode()      {}
+func (ip *InitParam) TokenLiteral() string { return ip.Token.Literal }
+func (ip *InitParam) String() string       { return ip.Parameter.Value }
+
 type Identifier struct {
 	Token token.Token // the token.IDENT token
 	Value string

@@ -1173,6 +1173,91 @@ func TestChangeValueOfExistingVariable(t *testing.T) {
 	}
 }
 
+func TestClassStatementParsing(t *testing.T) {
+	input := `
+	class Person {
+		var name = ""
+		var age = 0
+
+		init(name, this.age) {
+			name = "Hans"
+		}
+
+		func getName() {
+			return name
+		}
+
+		func getAge() {
+			return age
+		}
+	}
+	`
+
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+
+	if len(program.Statements) != 1 {
+		t.Fatalf("program.Statements does not contain %d statements. got=%d\n",
+			1, len(program.Statements))
+	}
+	stmt, ok := program.Statements[0].(*ast.ClassStatement)
+	if !ok {
+		t.Fatalf("program.Statements[0] is not ast.ClassStatement. got=%T",
+			program.Statements[0])
+	}
+
+	// Name
+	if stmt.Name.Value != "Person" {
+		t.Errorf("Name of class is not Person. got=%s", stmt.Name.Value)
+	}
+
+	// Fields
+	if stmt.Fields[0].Name.Value != "name" {
+		t.Errorf("Name of first Varstatement is not name. got=%s", stmt.Fields[0].Name.Value)
+	}
+
+	if stmt.Fields[0].Value.String() != "" {
+		t.Errorf("Value of first Varstatement is not empty string. got=%s", stmt.Fields[0].Value.String())
+	}
+
+	if stmt.Fields[1].Name.Value != "age" {
+		t.Errorf("Name of second Varstatement is not age. got=%s", stmt.Fields[1].Name.Value)
+	}
+
+	if stmt.Fields[1].Value.String() != "0" {
+		t.Errorf("Value of second Varstatement is not 0. got=%s", stmt.Fields[1].Value.String())
+	}
+
+	// Init function
+	if stmt.InitParams[0].Parameter.Value != "name" {
+		t.Errorf("Name of first InitParameter is not name. got=%s", stmt.InitParams[0].Parameter.Value)
+	}
+
+	if stmt.InitParams[0].IsThisParam != false {
+		t.Errorf("First InitParameter does not have 'false' isThisParam. got=%t",
+			stmt.InitParams[0].IsThisParam)
+	}
+
+	if stmt.InitParams[1].Parameter.Value != "age" {
+		t.Errorf("Name of second InitParameter is not name. got=%s", stmt.InitParams[1].Parameter.Value)
+	}
+
+	if stmt.InitParams[1].IsThisParam != true {
+		t.Errorf("Second InitParameter does not have 'true' isThisParam. got=%t",
+			stmt.InitParams[1].IsThisParam)
+	}
+
+	if stmt.Functions[0].Name.String() != "getName" {
+		t.Errorf("stmt.Functions[0].Name is not getName. got=%s", stmt.Functions[0].Name.String())
+	}
+
+	if stmt.Functions[1].Name.String() != "getAge" {
+		t.Errorf("stmt.Functions[1].Name is not getAge. got=%s", stmt.Functions[1].Name.String())
+	}
+}
+
 ///////////////////////////////////////////
 //////////// Helper functions /////////////
 ///////////////////////////////////////////

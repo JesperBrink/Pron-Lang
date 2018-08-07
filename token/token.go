@@ -33,6 +33,7 @@ const (
 	COMMA     = ","
 	SEMICOLON = ";"
 	COLON     = ":"
+	DOT       = "."
 
 	LPAREN   = "("
 	RPAREN   = ")"
@@ -56,6 +57,7 @@ const (
 	IN       = "IN"
 	CLASS    = "CLASS"
 	INIT     = "INIT"
+	THIS     = "THIS"
 )
 
 var keywords = map[string]TokenType{
@@ -73,6 +75,7 @@ var keywords = map[string]TokenType{
 	"in":     IN,
 	"class":  CLASS,
 	"init":   INIT,
+	"this":   THIS,
 }
 
 // Returns the TokenType that matches the ident given as argument.

@@ -101,9 +101,105 @@ func (p *Parser) parseStatement() ast.Statement {
 		return p.parseReturnStatement()
 	case token.FUNCTION:
 		return p.parseDirectFunctionStatement()
+	case token.CLASS:
+		return p.parseClassStatement()
 	default:
 		return p.parseExpressionStatement()
 	}
+}
+
+func (p *Parser) parseClassStatement() *ast.ClassStatement {
+	stmt := &ast.ClassStatement{Token: p.curToken}
+
+	p.nextToken()
+
+	stmt.Name = p.parseIdentifier().(*ast.Identifier)
+	fields := []*ast.VarStatement{}
+	functions := []*ast.DirectFunctionStatement{}
+
+	if !p.expectPeek(token.LBRACE) {
+		return nil
+	}
+
+	p.nextToken()
+
+	for !p.curTokenIs(token.RBRACE) {
+		switch p.curToken.Type {
+		case token.VAR:
+			fields = append(fields, p.parseVarStatement().(*ast.VarStatement))
+		case token.FUNCTION:
+			functions = append(functions, p.parseDirectFunctionStatement())
+		case token.INIT:
+			initParams, initFunction := p.parseInitFunction()
+			stmt.InitParams = initParams
+			stmt.InitFunction = initFunction
+		}
+
+		p.nextToken()
+	}
+
+	stmt.Fields = fields
+	stmt.Functions = functions
+
+	return stmt
+}
+
+func (p *Parser) parseInitFunction() ([]*ast.InitParam, *ast.BlockStatement) {
+	initParams := []*ast.InitParam{}
+
+	if !p.expectPeek(token.LPAREN) {
+		return nil, nil
+	}
+
+	if !p.peekTokenIs(token.RPAREN) {
+		p.nextToken()
+
+		if p.curTokenIs(token.THIS) {
+			p.nextToken()
+			p.nextToken()
+			ident := p.parseIdentifier().(*ast.Identifier)
+			param := &ast.InitParam{Token: p.curToken, Parameter: ident, IsThisParam: true}
+			initParams = append(initParams, param)
+		} else if p.curTokenIs(token.IDENT) {
+			ident := p.parseIdentifier().(*ast.Identifier)
+			param := &ast.InitParam{Token: p.curToken, Parameter: ident, IsThisParam: false}
+			initParams = append(initParams, param)
+		} else {
+			return nil, nil
+		}
+
+		for p.peekTokenIs(token.COMMA) {
+			p.nextToken()
+			p.nextToken()
+			if p.curTokenIs(token.THIS) {
+				p.nextToken()
+				p.nextToken()
+				ident := p.parseIdentifier().(*ast.Identifier)
+				param := &ast.InitParam{Token: p.curToken, Parameter: ident, IsThisParam: true}
+				initParams = append(initParams, param)
+			} else if p.curTokenIs(token.IDENT) {
+				ident := p.parseIdentifier().(*ast.Identifier)
+				param := &ast.InitParam{Token: p.curToken, Parameter: ident, IsThisParam: false}
+				initParams = append(initParams, param)
+			} else {
+				return nil, nil
+			}
+		}
+
+		if !p.expectPeek(token.RPAREN) {
+			return nil, nil
+		}
+	} else {
+		p.nextToken()
+	}
+
+	if !p.expectPeek(token.LBRACE) {
+		return nil, nil
+	}
+
+	function := p.parseBlockStatement()
+
+	return initParams, function
 }
 
 func (p *Parser) parseDirectFunctionStatement() *ast.DirectFunctionStatement {

@@ -45,6 +45,7 @@ func TestNextToken(t *testing.T) {
 				puts("Initialized")
 			}
 		}
+		var p1 = new Person("Hans")
 		`
 
 	tests := []struct {
@@ -198,6 +199,14 @@ func TestNextToken(t *testing.T) {
 		{token.RPAREN, ")"},
 		{token.RBRACE, "}"},
 		{token.RBRACE, "}"},
+		{token.VAR, "var"},
+		{token.IDENT, "p1"},
+		{token.ASSIGN, "="},
+		{token.NEW, "new"},
+		{token.IDENT, "Person"},
+		{token.LPAREN, "("},
+		{token.STRING, "Hans"},
+		{token.RPAREN, ")"},
 		{token.EOF, ""},
 	}
 

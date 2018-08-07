@@ -58,6 +58,7 @@ const (
 	CLASS    = "CLASS"
 	INIT     = "INIT"
 	THIS     = "THIS"
+	NEW      = "NEW"
 )
 
 var keywords = map[string]TokenType{
@@ -76,6 +77,7 @@ var keywords = map[string]TokenType{
 	"class":  CLASS,
 	"init":   INIT,
 	"this":   THIS,
+	"new":    NEW,
 }
 
 // Returns the TokenType that matches the ident given as argument.

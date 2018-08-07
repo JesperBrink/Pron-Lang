@@ -695,6 +695,103 @@ func TestArrayForloopExpressions(t *testing.T) {
 	}
 }
 
+func TestClassObject(t *testing.T) {
+	input := `
+	class Person {
+		var name = ""
+		var age = 0
+
+		init(name, this.age) {
+			name = "Hans"
+		}
+
+		func getName(dummyParam) {
+			return name
+		}
+	}`
+
+	evaluated := testEval(input)
+	result, ok := evaluated.(*object.ClassInstance)
+	if !ok {
+		t.Fatalf("Eval didn't return ClassInstance. got=%T (%+v)", evaluated, evaluated)
+	}
+
+	if result.Name != "Person" {
+		t.Errorf("result.Name is not Person. got=%s", result.Name)
+	}
+
+	env := result.Env
+
+	// Check fields
+	nameField, ok := env.Get("name")
+	if !ok {
+		t.Errorf("'name' is not in the env of Person")
+	}
+
+	nameStr, ok := nameField.(*object.String)
+	if !ok {
+		t.Errorf("'name' is not of type string. got=%T", nameField)
+	}
+
+	if nameStr.Value != "" {
+		t.Errorf("nameStr is not 'name'. got=%s", nameStr.Value)
+	}
+
+	ageField, ok := env.Get("age")
+	if !ok {
+		t.Errorf("'age' is not in the env of Person")
+	}
+
+	testIntegerObject(t, ageField, 0)
+
+	// check function
+	getName, ok := env.Get("getName")
+	if !ok {
+		t.Errorf("'getName' is not in the env of Person")
+	}
+
+	getNameFunc, ok := getName.(*object.Function)
+	if !ok {
+		t.Errorf("'getNameFunc' is not of type Function. got=%T", getName)
+	}
+
+	if getNameFunc.Parameters[0].Value != "dummyParam" {
+		t.Errorf("getNameFunc.Parameters[0].Value is not 'dummyParam'. got=%s",
+			getNameFunc.Parameters[0].Value)
+	}
+
+	// Check init
+	init, ok := env.Get("init")
+	if !ok {
+		t.Errorf("'init' is not in the env of Person")
+	}
+
+	initFunc, ok := init.(*object.InitFunction)
+	if !ok {
+		t.Errorf("'initFunc' is not of type InitFunction. got=%T", initFunc)
+	}
+
+	if initFunc.Parameters[0].Parameter.Value != "name" {
+		t.Errorf("initFunc.Parameters[0].Value is not 'name'. got=%s",
+			initFunc.Parameters[0].Parameter.Value)
+	}
+
+	if initFunc.Parameters[0].IsThisParam != false {
+		t.Errorf("initFunc.Parameters[0].IsThisParam is not 'false'. got=%t",
+			initFunc.Parameters[0].IsThisParam)
+	}
+
+	if initFunc.Parameters[1].Parameter.Value != "age" {
+		t.Errorf("initFunc.Parameters[1].Value is not 'age'. got=%s",
+			initFunc.Parameters[1].Parameter.Value)
+	}
+
+	if initFunc.Parameters[1].IsThisParam != true {
+		t.Errorf("initFunc.Parameters[1].IsThisParam is not 'true'. got=%t",
+			initFunc.Parameters[1].IsThisParam)
+	}
+}
+
 //////////////////////////////
 ////// Helper functions //////
 //////////////////////////////

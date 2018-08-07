@@ -3,7 +3,6 @@ package ast
 import (
 	"Pron-Lang/token"
 	"bytes"
-	"fmt"
 	"strings"
 )
 
@@ -62,12 +61,12 @@ func (ls *VarStatement) String() string {
 }
 
 type ClassStatement struct {
-	Token        token.Token // the token.Class token
-	Name         *Identifier
-	Fields       []*VarStatement
-	Functions    []*DirectFunctionStatement
-	InitParams   []*InitParam
-	InitFunction *BlockStatement
+	Token      token.Token // the token.Class token
+	Name       *Identifier
+	Fields     []*VarStatement
+	Functions  []*DirectFunctionStatement
+	InitParams []*InitParam
+	InitBody   *BlockStatement
 }
 
 func (cs *ClassStatement) statementNode()       {}
@@ -93,7 +92,7 @@ func (cs *ClassStatement) String() string {
 	out.WriteString("class " + cs.Name.Value + " {")
 	out.WriteString(strings.Join(fields, "\n"))
 	out.WriteString("init(" + strings.Join(params, ", ") + ") {")
-	out.WriteString(cs.InitFunction.String())
+	out.WriteString(cs.InitBody.String())
 	out.WriteString("}")
 	out.WriteString(strings.Join(functions, "\n"))
 	out.WriteString("}")
@@ -176,7 +175,7 @@ func (dfs *DirectFunctionStatement) String() string {
 
 	params := []string{}
 	for _, p := range dfs.Function.Parameters {
-		fmt.Print(p.String())
+		//fmt.Print(p.String())
 		params = append(params, p.String())
 	}
 

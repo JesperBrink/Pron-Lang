@@ -90,6 +90,9 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 		}
 		env.Set(node.Name.Value, val)
 
+	case *ast.ClassStatement:
+		return evalClassStatement(node, env)
+
 	// Expressions
 	case *ast.IntegerLiteral:
 		return &object.Integer{Value: node.Value}
@@ -150,6 +153,38 @@ func evalProgram(program *ast.Program, env *object.Environment) object.Object {
 	}
 
 	return result
+}
+
+func evalClassStatement(node *ast.ClassStatement, env *object.Environment) object.Object {
+	// Create local env
+	classEnv := object.NewEnvironment()
+
+	// Eval fields
+	for _, field := range node.Fields {
+		val := Eval(field.Value, classEnv)
+		if isError(val) {
+			return val
+		}
+		classEnv.Set(field.Name.Value, val)
+	}
+
+	// Eval functions
+	for _, function := range node.Functions {
+		var newNode ast.Node
+		newNode = &function.Function
+		val := Eval(newNode, classEnv)
+		if isError(val) {
+			return val
+		}
+		classEnv.Set(function.Name.Value, val)
+	}
+
+	// Eval init
+	initFunction := &object.InitFunction{Parameters: node.InitParams, Body: node.InitBody, Env: classEnv}
+	classEnv.Set("init", initFunction)
+
+	// Put class into global env
+	return &object.ClassInstance{Name: node.Name.Value, Env: classEnv}
 }
 
 func evalBlockStatement(block *ast.BlockStatement, env *object.Environment) object.Object {

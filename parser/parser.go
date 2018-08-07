@@ -130,9 +130,9 @@ func (p *Parser) parseClassStatement() *ast.ClassStatement {
 		case token.FUNCTION:
 			functions = append(functions, p.parseDirectFunctionStatement())
 		case token.INIT:
-			initParams, initFunction := p.parseInitFunction()
+			initParams, initBody := p.parseInitFunction()
 			stmt.InitParams = initParams
-			stmt.InitFunction = initFunction
+			stmt.InitBody = initBody
 		}
 
 		p.nextToken()
@@ -197,9 +197,9 @@ func (p *Parser) parseInitFunction() ([]*ast.InitParam, *ast.BlockStatement) {
 		return nil, nil
 	}
 
-	function := p.parseBlockStatement()
+	body := p.parseBlockStatement()
 
-	return initParams, function
+	return initParams, body
 }
 
 func (p *Parser) parseDirectFunctionStatement() *ast.DirectFunctionStatement {

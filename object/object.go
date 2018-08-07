@@ -23,6 +23,8 @@ const (
 	BUILTIN_OBJ        = "BUILTIN"
 	ARRAY_OBJ          = "ARRAY"
 	HASH_OBJ           = "HASH"
+	CLASS_OBJ          = "CLASS"
+	INITFUNCTION_OBJ   = "INITFUNCTION"
 )
 
 type Object interface {
@@ -82,7 +84,7 @@ func (f *Function) Inspect() string {
 		params = append(params, param.String())
 	}
 
-	out.WriteString("fn")
+	out.WriteString("func")
 	out.WriteString("(")
 	out.WriteString(strings.Join(params, ", "))
 	out.WriteString(") {\n")
@@ -174,6 +176,44 @@ func (h *Hash) Inspect() string {
 	out.WriteString("{")
 	out.WriteString(strings.Join(pairs, ", "))
 	out.WriteString("}")
+
+	return out.String()
+}
+
+type ClassInstance struct {
+	Name string // Name of class
+	Env  *Environment
+}
+
+func (ci *ClassInstance) Type() ObjectType { return CLASS_OBJ }
+func (ci *ClassInstance) Inspect() string  { return "Class: " + ci.Name }
+
+type InitFunction struct {
+	Parameters []*ast.InitParam
+	Body       *ast.BlockStatement
+	Env        *Environment
+}
+
+func (i *InitFunction) Type() ObjectType { return INITFUNCTION_OBJ }
+func (i *InitFunction) Inspect() string {
+	var out bytes.Buffer
+
+	params := []string{}
+	for _, param := range i.Parameters {
+		if param.IsThisParam {
+			params = append(params, "this."+param.String())
+		} else {
+			params = append(params, param.String())
+		}
+
+	}
+
+	out.WriteString("init")
+	out.WriteString("(")
+	out.WriteString(strings.Join(params, ", "))
+	out.WriteString(") {\n")
+	out.WriteString(i.Body.String())
+	out.WriteString("\n}")
 
 	return out.String()
 }

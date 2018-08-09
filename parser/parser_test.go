@@ -1306,6 +1306,47 @@ func TestClassInitializationParsing(t *testing.T) {
 	}
 }
 
+func TestCallObjectFunction(t *testing.T) {
+	input := `p.changeName("Ole")`
+
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+
+	if len(program.Statements) != 1 {
+		t.Fatalf("program.Statements does not contain %d statements. got=%d\n",
+			1, len(program.Statements))
+	}
+
+	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("program.Statements[0] is not ast.ExpressionStatement. got=%T",
+			program.Statements[0])
+	}
+
+	exp, ok := stmt.Expression.(*ast.CallObjectFunction)
+	if !ok {
+		t.Fatalf("stmt.Expression is not *ast.CallObjectFunction. got=%T", stmt.Expression)
+	}
+
+	if exp.ObjectName.Value != "p" {
+		t.Errorf("exp.ObjectName.Value is not 'p'. got=%s", exp.ObjectName.Value)
+	}
+
+	if exp.FunctionName.Value != "changeName" {
+		t.Errorf("exp.FunctionName.Value is not 'changeName'. got=%s", exp.FunctionName.Value)
+	}
+
+	if len(exp.Arguments) != 1 {
+		t.Errorf("len(exp.Arguments) is not 1. got=%d", len(exp.Arguments))
+	}
+
+	if exp.Arguments[0].String() != "Ole" {
+		t.Errorf("exp.Arguments[0].String() is not 'Ole'. got=%s", exp.Arguments[0].String())
+	}
+}
+
 ///////////////////////////////////////////
 //////////// Helper functions /////////////
 ///////////////////////////////////////////

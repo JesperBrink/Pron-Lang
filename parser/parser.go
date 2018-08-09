@@ -322,7 +322,34 @@ func (p *Parser) expectPeek(t token.TokenType) bool {
 }
 
 func (p *Parser) parseIdentifier() ast.Expression {
+	if p.peekTokenIs(token.DOT) {
+		// It's CallObjectFunction
+		return p.parseCallObjectFunction()
+	}
+
 	return &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+}
+
+func (p *Parser) parseCallObjectFunction() ast.Expression {
+	callObjectFunction := &ast.CallObjectFunction{}
+
+	// UPS: Cannot use the parseIdentifier,
+	// because it would end in a infinite loop if we call it here
+	callObjectFunction.ObjectName = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+
+	p.nextToken()
+
+	callObjectFunction.Token = p.curToken
+
+	p.nextToken()
+
+	callObjectFunction.FunctionName = p.parseIdentifier().(*ast.Identifier)
+
+	p.nextToken()
+
+	callObjectFunction.Arguments = p.parseExpressionList(token.RPAREN)
+
+	return callObjectFunction
 }
 
 func (p *Parser) parseIntegerLiteral() ast.Expression {

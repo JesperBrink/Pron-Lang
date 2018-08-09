@@ -894,6 +894,31 @@ func TestObjectInitializationWithoutParameters(t *testing.T) {
 	testIntegerObject(t, ageField, 0)
 }
 
+func TestCallObjectFunction(t *testing.T) {
+	input := `
+	class Person {
+		var name = "Hans"
+
+		func getName() {
+			return name
+		}
+	}
+	var p = new Person()
+	return p.getName()
+	`
+
+	evaluated := testEval(input)
+	result, ok := evaluated.(*object.String)
+	if !ok {
+		t.Fatalf("Eval didn't return String. got=%T (%+v)", evaluated, evaluated)
+	}
+
+	if result.Value != "Hans" {
+		t.Errorf("result.Value is not 'Hans'. got=%s", result.Value)
+	}
+
+}
+
 //////////////////////////////
 ////// Helper functions //////
 //////////////////////////////

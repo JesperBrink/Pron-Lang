@@ -136,6 +136,9 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 
 	case *ast.ObjectInitialization:
 		return evalObjectInitialization(node, env)
+
+	case *ast.CallObjectFunction:
+		return evalCallObejctFunction(node, env)
 	}
 
 	return nil
@@ -156,6 +159,28 @@ func evalProgram(program *ast.Program, env *object.Environment) object.Object {
 	}
 
 	return result
+}
+
+func evalCallObejctFunction(node *ast.CallObjectFunction, env *object.Environment) object.Object {
+	objObject, ok := env.Get(node.ObjectName.Value)
+	if !ok {
+		return newError("%s is not defined", node.ObjectName.Value)
+	}
+
+	obj, ok := objObject.(*object.ClassInstance)
+	if !ok {
+		return newError("%s is not an object. It's a %T", obj.Name, objObject)
+	}
+
+	functionObject, ok := obj.Env.Get(node.FunctionName.Value)
+	if !ok {
+		return newError("%s is not a defined method", node.FunctionName.Value)
+	}
+	function := functionObject.(*object.Function)
+
+	//evalExpressions returns []object.Object
+	arguments := evalExpressions(node.Arguments, obj.Env)
+	return applyFunction(function, arguments)
 }
 
 func evalObjectInitialization(node *ast.ObjectInitialization, env *object.Environment) object.Object {

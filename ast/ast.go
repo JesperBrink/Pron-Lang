@@ -539,3 +539,30 @@ func (oi *ObjectInitialization) String() string {
 
 	return out.String()
 }
+
+type CallObjectFunction struct {
+	Token        token.Token // the DOT token
+	ObjectName   *Identifier
+	FunctionName *Identifier
+	Arguments    []Expression
+}
+
+func (cof *CallObjectFunction) expressionNode()      {}
+func (cof *CallObjectFunction) TokenLiteral() string { return cof.Token.Literal }
+func (cof *CallObjectFunction) String() string {
+	var out bytes.Buffer
+
+	args := []string{}
+	for _, arg := range cof.Arguments {
+		args = append(args, arg.String())
+	}
+
+	out.WriteString(cof.ObjectName.String())
+	out.WriteString(".")
+	out.WriteString(cof.FunctionName.String())
+	out.WriteString("(")
+	out.WriteString(strings.Join(args, ", "))
+	out.WriteString(")")
+
+	return out.String()
+}

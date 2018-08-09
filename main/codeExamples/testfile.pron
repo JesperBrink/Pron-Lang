@@ -39,15 +39,23 @@ for (elem in myArr) {
 }
 
 class Person {
+    var name = ""
     var age = 0
     var kilo = 0
 
-    init(name, this.age, this.kilo) {
-        puts(name)
-        puts(age)
-        puts(kilo)
+    init(this.name, this.age, this.kilo) {}
+
+    func getName() {
+        return name
+    }
+
+    func setName(newName) {
+        name = newName
     }
 }
 
-new Person("Ole", 24, 50)
-new Person("Lars", 35, 55)
+var p = new Person("Ole", 24, 50)
+puts(p.getName())
+p.setName("Hans")
+puts(p.getName())
+

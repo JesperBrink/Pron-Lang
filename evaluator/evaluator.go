@@ -2,8 +2,14 @@ package evaluator
 
 import (
 	"Pron-Lang/ast"
+	"Pron-Lang/lexer"
 	"Pron-Lang/object"
+	"Pron-Lang/parser"
 	"fmt"
+	"io"
+	"io/ioutil"
+	"os"
+	"path/filepath"
 )
 
 var (
@@ -76,6 +82,7 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 
 	case *ast.VarStatement:
 		val := Eval(node.Value, env)
+
 		if isError(val) {
 			return val
 		}
@@ -163,6 +170,7 @@ func evalProgram(program *ast.Program, env *object.Environment) object.Object {
 
 func evalCallObejctFunction(node *ast.CallObjectFunction, env *object.Environment) object.Object {
 	objObject, ok := env.Get(node.ObjectName.Value)
+
 	if !ok {
 		return newError("%s is not defined", node.ObjectName.Value)
 	}
@@ -180,40 +188,68 @@ func evalCallObejctFunction(node *ast.CallObjectFunction, env *object.Environmen
 
 	//evalExpressions returns []object.Object
 	arguments := evalExpressions(node.Arguments, obj.Env)
+	// update the function Environment
+	function.Env = obj.Env
 	return applyFunction(function, arguments)
 }
 
 func evalObjectInitialization(node *ast.ObjectInitialization, env *object.Environment) object.Object {
 	classInstanceObject, ok := env.Get(node.Name.Value)
+
 	if !ok {
-		return newError("There is no Class called: " + node.Name.Value)
+		// Check if class is defined in external file
+		absPath, _ := filepath.Abs("main/" + node.Name.Value + ".pron")
+		input, err := ioutil.ReadFile(absPath)
+
+		if err != nil {
+			// There wasn't any other file with the class
+			return newError("There is no Class called: " + node.Name.Value)
+		}
+
+		// Lex the new file
+		l := lexer.New(string(input))
+		// Parse the lexer
+		p := parser.New(l)
+		program := p.ParseProgram()
+
+		if len(p.Errors()) != 0 {
+			PrintParserErrors(p.Errors())
+		}
+
+		// Eval the program
+		classInstanceObject = Eval(program, env)
 	}
+
 	classInstance := classInstanceObject.(*object.ClassInstance)
 
-	initFunctionObject, ok := classInstance.Env.Get("init")
+	// Creating copy of classInstance, because classInstance is a pointer
+	// we don't want to change values on
+	var classInstanceCopy object.ClassInstance
+	classInstanceCopy.Name = classInstance.Name
+	classInstanceCopy.Env = classInstance.Env.GetCopyOfEnvWithEmptyOuter()
+
+	initFunctionObject, ok := classInstanceCopy.Env.Get("init")
 	if !ok {
-		return classInstance
+		return &classInstanceCopy
 	}
 	initFunction := initFunctionObject.(*object.InitFunction)
 
 	args := node.Arguments
 
 	// Create env with all arguments that isn't a 'this.' argument
-	newEnv := object.NewEnclosedEnvironment(initFunction.Env)
-
+	newEnv := object.NewEnclosedEnvironment(classInstanceCopy.Env) //initFunction.Env
 	for paramIdx, param := range initFunction.Parameters {
 		if param.IsThisParam {
-			val := Eval(args[paramIdx], classInstance.Env)
-			classInstance.Env.Update(param.Parameter.Value, val)
+			val := Eval(args[paramIdx], classInstanceCopy.Env)
+			classInstanceCopy.Env.Update(param.Parameter.Value, val)
 		} else {
 			val := Eval(args[paramIdx], newEnv)
 			newEnv.Set(param.Parameter.Value, val)
 		}
-
 	}
 
 	Eval(initFunction.Body, newEnv)
-	return classInstance
+	return &classInstanceCopy
 }
 
 func evalClassStatement(node *ast.ClassStatement, env *object.Environment) object.Object {
@@ -549,15 +585,16 @@ func unwrapReturnValue(obj object.Object) object.Object {
 func evalAssignValueToExistingVariable(left, right ast.Expression, env *object.Environment) object.Object {
 	leftIdentifier, ok := left.(*ast.Identifier)
 	if !ok {
-		return newError("leftside of assignment is not a string. got=%T (%+v)", left, left)
+		return newError("leftside of assignment is not an identifier. got=%T (%+v)", left, left)
 	}
 
 	val := Eval(right, env)
-	// check existens of variables
+
+	// check existens of variables and assign value if it exists
 	if !env.Update(leftIdentifier.Value, val) {
 		return newError("%s is not defined", leftIdentifier.Value)
 	}
-	//env.Set(leftIdentifier.Value, val)
+
 	return val
 }
 
@@ -643,4 +680,12 @@ func evalHashIndexExpression(hash, index object.Object) object.Object {
 	}
 
 	return pair.Value
+}
+
+func PrintParserErrors(errors []string) {
+	out := os.Stdout
+	io.WriteString(out, " parser errors:\n")
+	for _, msg := range errors {
+		io.WriteString(out, "\t"+"- "+msg+"\n")
+	}
 }

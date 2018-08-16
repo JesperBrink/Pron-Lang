@@ -1,0 +1,15 @@
+class TestClass {
+    var name = ""
+    var age = 0
+    var kilo = 0
+
+    init(this.name, this.age, this.kilo) {}
+
+    func getName() {
+        return name
+    }
+
+    func setName(newName) {
+        name = newName
+    }
+}

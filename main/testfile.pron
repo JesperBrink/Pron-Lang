@@ -38,12 +38,17 @@ for (elem in myArr) {
     puts(elem)
 }
 
-class Person {
+puts("")
+
+class TestClass {
     var name = ""
     var age = 0
     var kilo = 0
 
-    init(this.name, this.age, this.kilo) {}
+    init(this.name, this.age, this.kilo) {
+        puts("Init was called")
+        puts("name" + getName())
+    }
 
     func getName() {
         return name
@@ -54,8 +59,16 @@ class Person {
     }
 }
 
-var p = new Person("Ole", 24, 50)
-puts(p.getName())
+var p = new TestClass("Ole", 24, 50)
+var person = new TestClass("Karsten", 30, 60)
+var per = new TestClass("Lol", 30, 65)
+
+
+puts("Should be Ole. Is: " + p.getName())
 p.setName("Hans")
-puts(p.getName())
+puts("Should be Hans. Is: " + p.getName())
+
+puts("Should be Karsten. Is: " + person.getName())
+puts("Should be Lol. Is: " + per.getName())
+
 

@@ -38,3 +38,19 @@ func (e *Environment) Update(name string, val Object) bool {
 	}
 	return ok
 }
+
+func (e *Environment) GetCopyOfEnvWithEmptyOuter() *Environment {
+	newEnv := &Environment{}
+
+	newStore := map[string]Object{}
+	newOuter := Environment{}
+
+	for key, value := range e.store {
+		newStore[key] = value
+	}
+
+	newEnv.store = newStore
+	newEnv.outer = &newOuter
+
+	return newEnv
+}

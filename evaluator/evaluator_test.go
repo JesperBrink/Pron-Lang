@@ -601,7 +601,7 @@ func TestIncrementForloopExpressions(t *testing.T) {
 			4,
 		},
 		{
-			"var x = 0; for (i from 0 to 10) { x = i; puts(i)}; return x;",
+			"var x = 0; for (i from 0 to 10) { x = i }; return x;",
 			9,
 		},
 		{

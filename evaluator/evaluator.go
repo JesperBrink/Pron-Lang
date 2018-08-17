@@ -10,6 +10,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strconv"
 )
 
 var (
@@ -230,6 +231,13 @@ func evalObjectInitialization(node *ast.ObjectInitialization, env *object.Enviro
 
 	initFunctionObject, ok := classInstanceCopy.Env.Get("init")
 	if !ok {
+
+		// Check number of arguments is 0
+		if len(node.Arguments) != 0 {
+			return newError("Number of arguments in " + node.Name.Value +
+				" should be 0. got " + strconv.Itoa(len(node.Arguments)))
+		}
+
 		return &classInstanceCopy
 	}
 	initFunction := initFunctionObject.(*object.InitFunction)

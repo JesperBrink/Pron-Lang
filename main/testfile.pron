@@ -3,69 +3,48 @@ var result = add(2,8)
 
 
 if (result > 11) {
-    puts("over 11")
+    print("over 11")
 } elif (result == 10) {
-    puts("exactly 10")
+    print("exactly 10")
 } else {
-    puts("under 10")
+    print("under 10")
 };
 
 
 var hej = "lol" var lol = "hej"
-puts(hej) puts(lol)
+print(hej) print(lol)
 
 
 func sub(x, y) { 
     x - y
 }
 var resultTwo = sub(5,2)
-puts(resultTwo)
+print(resultTwo)
 
-puts("For loop that increments")
+print("For loop that increments")
 for (i from 0 to 5) {
-    puts(i)
+    print(i)
 }
 
-puts("For loop that decrements")
+print("For loop that decrements")
 for (i from 5 to 0) {
-    puts(i)
+    print(i)
 }
 
-puts("")
+print("")
 
 var myArr = [1, 4, 2, "hej"]
 for (elem in myArr) {
-    puts(elem)
+    print(elem)
 }
 
-puts("")
-
-class TestClass {
-    var name = ""
-    var age = 0
-    var kilo = 0
-
-    init(this.name, this.age, this.kilo) {
-        puts("Init was called")
-        puts("name" + getName())
-    }
-
-    func getName() {
-        return name
-    }
-
-    func setName(newName) {
-        name = newName
-    }
-}
+print("")
 
 var p = new TestClass("Ole", 24, 50)
 var p2 = new TestClass("Karsten", 30, 60)
 
 
-puts("Should be Ole. Is: " + p.getName())
+print("Should be Ole. Is: " + p.getName())
 p.setName("Hans")
-puts("Should be Hans. Is: " + p.getName())
-puts("Should be Karsten. Is: " + p2.getName())
-
-
+print("Should be Hans. Is: " + p.getName())
+print("Should be Karsten. Is: " + p2.getName())

@@ -60,15 +60,12 @@ class TestClass {
 }
 
 var p = new TestClass("Ole", 24, 50)
-var person = new TestClass("Karsten", 30, 60)
-var per = new TestClass("Lol", 30, 65)
+var p2 = new TestClass("Karsten", 30, 60)
 
 
 puts("Should be Ole. Is: " + p.getName())
 p.setName("Hans")
 puts("Should be Hans. Is: " + p.getName())
-
-puts("Should be Karsten. Is: " + person.getName())
-puts("Should be Lol. Is: " + per.getName())
+puts("Should be Karsten. Is: " + p2.getName())
 
 

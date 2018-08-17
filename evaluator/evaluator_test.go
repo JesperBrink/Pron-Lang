@@ -4,6 +4,7 @@ import (
 	"Pron-Lang/lexer"
 	"Pron-Lang/object"
 	"Pron-Lang/parser"
+	"strconv"
 	"testing"
 )
 
@@ -916,7 +917,47 @@ func TestCallObjectFunction(t *testing.T) {
 	if result.Value != "Hans" {
 		t.Errorf("result.Value is not 'Hans'. got=%s", result.Value)
 	}
+}
 
+func TestMultipleObjectInitializations(t *testing.T) {
+	input := `
+	class Person {
+		var name = ""
+		var age = 0
+
+		init(n, this.age) {
+			name = n
+		}
+	}
+	var p = new Person("Hans", 10)
+	var p2 = new Person("Ole", 15)
+	var p3 = new Person("Jens", 20)
+	var arr = [p, p2, p3]
+	return arr
+	`
+
+	evaluated := testEval(input)
+	result, ok := evaluated.(*object.Array)
+	if !ok {
+		t.Fatalf("Eval didn't return Array. got=%T (%+v)", evaluated, evaluated)
+	}
+
+	names := []string{"Hans", "Ole", "Jens"}
+	ages := []int{10, 15, 20}
+
+	for i, elem := range result.Elements {
+		person := elem.(*object.ClassInstance)
+
+		name, _ := person.Env.Get("name")
+		if name.Inspect() != names[i] {
+			t.Errorf("person.Env.Get(name) is not %s. got=%s", names[i], name.Inspect())
+		}
+
+		age, _ := person.Env.Get("age")
+		if age.Inspect() != strconv.Itoa(ages[i]) {
+			t.Errorf("person.Env.Get(age) is not %d. got=%s", ages[i], age.Inspect())
+		}
+	}
 }
 
 //////////////////////////////

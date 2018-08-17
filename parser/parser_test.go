@@ -1347,6 +1347,40 @@ func TestCallObjectFunction(t *testing.T) {
 	}
 }
 
+func TestNullInitializaitonOfVarStatements(t *testing.T) {
+	input := `
+	var x
+	var y
+	var z`
+
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+
+	if len(program.Statements) != 3 {
+		t.Fatalf("program.Statements does not contain 3 statements. got=%d",
+			len(program.Statements))
+	}
+
+	identifiers := []string{"x", "y", "z"}
+
+	for i, ident := range identifiers {
+		stmt := program.Statements[i]
+		if !testVarStatement(t, stmt, ident) {
+			return
+		}
+
+		val := stmt.(*ast.VarStatement).Value
+		_, ok := val.(*ast.Null)
+
+		if !ok {
+			t.Errorf("VarStatement.Value is not *ast.Null. got=%T", val)
+		}
+	}
+
+}
+
 ///////////////////////////////////////////
 //////////// Helper functions /////////////
 ///////////////////////////////////////////

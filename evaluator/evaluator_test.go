@@ -796,14 +796,14 @@ func TestClassObject(t *testing.T) {
 func TestObjectInitializationWithParameters(t *testing.T) {
 	input := `
 	class Person {
-		var name = ""
-		var age = 0
+		var name
+		var age
 
 		init(n, this.age) {
 			name = n
 		}
 
-		func getName(dummyParam) {
+		func getName() {
 			return name
 		}
 	}
@@ -852,7 +852,7 @@ func TestObjectInitializationWithoutParameters(t *testing.T) {
 		var name = ""
 		var age = 0
 
-		func getName(dummyParam) {
+		func getName() {
 			return name
 		}
 	}
@@ -922,8 +922,8 @@ func TestCallObjectFunction(t *testing.T) {
 func TestMultipleObjectInitializations(t *testing.T) {
 	input := `
 	class Person {
-		var name = ""
-		var age = 0
+		var name
+		var age
 
 		init(n, this.age) {
 			name = n
@@ -963,7 +963,7 @@ func TestMultipleObjectInitializations(t *testing.T) {
 func TestThisParametersIsSetBeforeExecutingInitBody(t *testing.T) {
 	input := `
 	class Person {
-		var name = ""
+		var name
 
 		init(this.name) {
 			name = "OVERRIDDEN"
@@ -982,6 +982,37 @@ func TestThisParametersIsSetBeforeExecutingInitBody(t *testing.T) {
 	name, _ := result.Env.Get("name")
 	if name.Inspect() != "OVERRIDDEN" {
 		t.Errorf("person.Env.Get(name) is not 'OVERRIDEN'. got=%s", name.Inspect())
+	}
+}
+
+func TestNullInitializationOfVariables(t *testing.T) {
+	input := `
+	var nullObj
+	return nullObj`
+
+	evaluated := testEval(input)
+	_, ok := evaluated.(*object.Null)
+
+	if !ok {
+		t.Errorf("evaluated was not *object.Null. got=%T", evaluated)
+	}
+}
+
+func TestLaterInitializationOfNullVariable(t *testing.T) {
+	input := `
+	var nullObj 
+	nullObj = "Hello"
+	return nullObj`
+
+	evaluated := testEval(input)
+	str, ok := evaluated.(*object.String)
+
+	if !ok {
+		t.Errorf("evaluated was not *object.String. got=%T", evaluated)
+	}
+
+	if str.Value != "Hello" {
+		t.Errorf("str.Value was not 'Hello'. got=%s", str.Value)
 	}
 }
 

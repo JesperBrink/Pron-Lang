@@ -119,6 +119,12 @@ func (i *Identifier) expressionNode()      {}
 func (i *Identifier) TokenLiteral() string { return i.Token.Literal }
 func (i *Identifier) String() string       { return i.Value }
 
+type Null struct{}
+
+func (n *Null) expressionNode()      {}
+func (n *Null) TokenLiteral() string { return "Null" }
+func (n *Null) String() string       { return "Null" }
+
 type ReturnStatement struct {
 	Token       token.Token // the 'return' statement
 	ReturnValue Expression

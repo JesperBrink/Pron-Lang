@@ -102,6 +102,9 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 		return evalClassStatement(node, env)
 
 	// Expressions
+	case *ast.Null:
+		return &object.Null{}
+
 	case *ast.IntegerLiteral:
 		return &object.Integer{Value: node.Value}
 

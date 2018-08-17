@@ -960,6 +960,31 @@ func TestMultipleObjectInitializations(t *testing.T) {
 	}
 }
 
+func TestThisParametersIsSetBeforeExecutingInitBody(t *testing.T) {
+	input := `
+	class Person {
+		var name = ""
+
+		init(this.name) {
+			name = "OVERRIDDEN"
+		}
+	}
+	var p = new Person("Hans")
+	return p
+	`
+
+	evaluated := testEval(input)
+	result, ok := evaluated.(*object.ClassInstance)
+	if !ok {
+		t.Fatalf("Eval didn't return ClassInstance. got=%T (%+v)", evaluated, evaluated)
+	}
+
+	name, _ := result.Env.Get("name")
+	if name.Inspect() != "OVERRIDDEN" {
+		t.Errorf("person.Env.Get(name) is not 'OVERRIDEN'. got=%s", name.Inspect())
+	}
+}
+
 //////////////////////////////
 ////// Helper functions //////
 //////////////////////////////

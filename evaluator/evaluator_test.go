@@ -1028,9 +1028,21 @@ func TestThisPrefixedIdentifier(t *testing.T) {
 		func getArgument(name) {
 			return name
 		}
+
+		func setName(name) {
+			this.name = name
+		}
+
+		func getName() {
+			return this.name
+		}
 	}
 	var p = new Person()
-	return [p.getHans("Jens"), p.getArgument("Jens")]
+	var n1 = p.getHans("Jens")
+	var n2 = p.getArgument("Jens")
+	p.setName("Ole")
+	var n3 = p.getName()
+	return [n1, n2, n3]
 	`
 
 	evaluated := testEval(input)
@@ -1056,6 +1068,15 @@ func TestThisPrefixedIdentifier(t *testing.T) {
 
 	if str2.Value != "Jens" {
 		t.Errorf("str2.Value is not 'Jens'. got=%s", str2.Value)
+	}
+
+	str3, ok := arr.Elements[2].(*object.String)
+	if !ok {
+		t.Errorf("arr.Elements[2] is not *object.String. got=%T", arr.Elements[2])
+	}
+
+	if str3.Value != "Ole" {
+		t.Errorf("str3.Value is not 'Ole'. got=%s", str3.Value)
 	}
 }
 

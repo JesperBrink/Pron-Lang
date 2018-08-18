@@ -9,7 +9,7 @@ class TestClass {
         return name
     }
 
-    func setName(newName) {
-        name = newName
+    func setName(name) {
+        this.name = name
     }
 }

@@ -609,9 +609,17 @@ func evalAssignValueToExistingVariable(left, right ast.Expression, env *object.E
 
 	val := Eval(right, env)
 
-	// check existens of variables and assign value if it exists
-	if !env.Update(leftIdentifier.Value, val) {
-		return newError("%s is not defined", leftIdentifier.Value)
+	// check if it is an 'this.' variable or just normal scope variable
+	if leftIdentifier.HasThisPrefix {
+		// check existens of variables and assign value if it exists
+		if !env.UpdateOuterMost(leftIdentifier.Value, val) {
+			return newError("%s is not defined. Try to remove 'this.'", leftIdentifier.Value)
+		}
+	} else {
+		// check existens of variables and assign value if it exists
+		if !env.Update(leftIdentifier.Value, val) {
+			return newError("%s is not defined", leftIdentifier.Value)
+		}
 	}
 
 	return val

@@ -48,6 +48,19 @@ func (e *Environment) Update(name string, val Object) bool {
 	return ok
 }
 
+func (e *Environment) UpdateOuterMost(name string, val Object) bool {
+	if e.outer != nil {
+		return e.outer.UpdateOuterMost(name, val)
+	}
+
+	_, ok := e.store[name]
+	if ok {
+		e.Set(name, val)
+	}
+
+	return ok
+}
+
 func (e *Environment) GetCopyOfEnvWithOuterEnvNil() *Environment {
 	newEnv := &Environment{}
 

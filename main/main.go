@@ -57,7 +57,7 @@ func main() {
 		}
 
 		evaluated := evaluator.Eval(program, env)
-		if evaluated != nil {
+		if evaluated != nil && evaluated.Inspect() != "null" {
 			io.WriteString(out, evaluated.Inspect())
 			io.WriteString(out, "\n")
 		}

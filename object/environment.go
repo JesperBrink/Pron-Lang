@@ -24,6 +24,15 @@ func (e *Environment) Get(name string) (Object, bool) {
 	return obj, ok
 }
 
+func (e *Environment) GetOuterMost(name string) (Object, bool) {
+	if e.outer != nil {
+		return e.outer.GetOuterMost(name)
+	}
+
+	obj, ok := e.store[name]
+	return obj, ok
+}
+
 func (e *Environment) Set(name string, val Object) Object {
 	e.store[name] = val
 	return val
@@ -39,18 +48,16 @@ func (e *Environment) Update(name string, val Object) bool {
 	return ok
 }
 
-func (e *Environment) GetCopyOfEnvWithEmptyOuter() *Environment {
+func (e *Environment) GetCopyOfEnvWithOuterEnvNil() *Environment {
 	newEnv := &Environment{}
 
 	newStore := map[string]Object{}
-	newOuter := Environment{}
 
 	for key, value := range e.store {
 		newStore[key] = value
 	}
 
 	newEnv.store = newStore
-	newEnv.outer = &newOuter
 
 	return newEnv
 }

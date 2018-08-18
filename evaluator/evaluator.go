@@ -230,7 +230,7 @@ func evalObjectInitialization(node *ast.ObjectInitialization, env *object.Enviro
 	// we don't want to change values on
 	var classInstanceCopy object.ClassInstance
 	classInstanceCopy.Name = classInstance.Name
-	classInstanceCopy.Env = classInstance.Env.GetCopyOfEnvWithEmptyOuter()
+	classInstanceCopy.Env = classInstance.Env.GetCopyOfEnvWithOuterEnvNil()
 
 	initFunctionObject, ok := classInstanceCopy.Env.Get("init")
 	if !ok {
@@ -536,6 +536,14 @@ func isError(obj object.Object) bool {
 }
 
 func evalIdentifier(node *ast.Identifier, env *object.Environment) object.Object {
+	if node.HasThisPrefix {
+		if val, ok := env.GetOuterMost(node.Value); ok {
+			return val
+		} else {
+			return newError("identifier not found: '" + node.Value + "'. Try to remove 'this.'")
+		}
+	}
+
 	if val, ok := env.Get(node.Value); ok {
 		return val
 	}

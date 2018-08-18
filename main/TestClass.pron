@@ -1,7 +1,7 @@
 class TestClass {
-    var name = ""
-    var age = 0
-    var kilo = 0
+    var name
+    var age
+    var kilo
 
     init(this.name, this.age, this.kilo) {}
 

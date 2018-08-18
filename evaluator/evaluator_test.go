@@ -1016,6 +1016,49 @@ func TestLaterInitializationOfNullVariable(t *testing.T) {
 	}
 }
 
+func TestThisPrefixedIdentifier(t *testing.T) {
+	input := `
+	class Person {
+		var name = "Hans"
+
+		func getHans(name) {
+			return this.name
+		}
+
+		func getArgument(name) {
+			return name
+		}
+	}
+	var p = new Person()
+	return [p.getHans("Jens"), p.getArgument("Jens")]
+	`
+
+	evaluated := testEval(input)
+
+	arr, ok := evaluated.(*object.Array)
+	if !ok {
+		t.Fatalf("evaluated is not *object.Array. got=%T (%+v)", evaluated, evaluated)
+	}
+
+	str, ok := arr.Elements[0].(*object.String)
+	if !ok {
+		t.Errorf("arr.Elements[0] is not *object.String. got=%T", arr.Elements[0])
+	}
+
+	if str.Value != "Hans" {
+		t.Errorf("str.Value is not 'Hans'. got=%s", str.Value)
+	}
+
+	str2, ok := arr.Elements[1].(*object.String)
+	if !ok {
+		t.Errorf("arr.Elements[1] is not *object.String. got=%T", arr.Elements[1])
+	}
+
+	if str2.Value != "Jens" {
+		t.Errorf("str2.Value is not 'Jens'. got=%s", str2.Value)
+	}
+}
+
 //////////////////////////////
 ////// Helper functions //////
 //////////////////////////////

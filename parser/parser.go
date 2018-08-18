@@ -330,6 +330,12 @@ func (p *Parser) parseIdentifier() ast.Expression {
 	return &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
 }
 
+func (p *Parser) parseThisPrefixedIdentifier() ast.Expression {
+	p.nextToken()
+	p.nextToken()
+	return &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal, HasThisPrefix: true}
+}
+
 func (p *Parser) parseCallObjectFunction() ast.Expression {
 	callObjectFunction := &ast.CallObjectFunction{}
 
@@ -773,6 +779,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerPrefix(token.LBRACE, p.parseHashLiteral)
 	p.registerPrefix(token.FOR, p.parseForloopExpression)
 	p.registerPrefix(token.NEW, p.parseObjectInitialization)
+	p.registerPrefix(token.THIS, p.parseThisPrefixedIdentifier)
 
 	p.infixParseFns = make(map[token.TokenType]infixParseFn)
 	p.registerInfix(token.PLUS, p.parseInfixExpression)

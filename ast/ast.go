@@ -111,8 +111,9 @@ func (ip *InitParam) TokenLiteral() string { return ip.Token.Literal }
 func (ip *InitParam) String() string       { return ip.Parameter.Value }
 
 type Identifier struct {
-	Token token.Token // the token.IDENT token
-	Value string
+	Token         token.Token // the token.IDENT token
+	Value         string
+	HasThisPrefix bool // is prefixed with 'this.'
 }
 
 func (i *Identifier) expressionNode()      {}

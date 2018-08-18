@@ -70,6 +70,26 @@ func TestIntegerLiteralExpression(t *testing.T) {
 	testLiteralExpression(t, stmt.Expression, 5)
 }
 
+func TestRealLiteralExpression(t *testing.T) {
+	input := "5.4"
+
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+
+	if len(program.Statements) != 1 {
+		t.Fatalf("program has not enough statements. got=%d", len(program.Statements))
+	}
+
+	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("program.Statements[0] is not ast.ExpressionStatement. got=%T", program.Statements[0])
+	}
+
+	testLiteralExpression(t, stmt.Expression, 5.4)
+}
+
 func TestVarStatements(t *testing.T) {
 	tests := []struct {
 		input              string
@@ -1493,6 +1513,8 @@ func testLiteralExpression(t *testing.T, exp ast.Expression, expected interface{
 		return testIdentifier(t, exp, v)
 	case bool:
 		return testBooleanLiteral(t, exp, v)
+	case float64:
+		return testRealLiteral(t, exp, float64(v))
 	}
 	t.Errorf("type of exp not handled. got=%T", exp)
 	return false
@@ -1539,6 +1561,21 @@ func testIntegerLiteral(t *testing.T, il ast.Expression, value int64) bool {
 		t.Errorf("integ.TokenLiteral not %d. got=%s", value,
 			integ.TokenLiteral())
 	}
+	return true
+}
+
+func testRealLiteral(t *testing.T, il ast.Expression, value float64) bool {
+	real, ok := il.(*ast.RealLiteral)
+	if !ok {
+		t.Errorf("il not *ast.RealLiteral. got=%T", il)
+		return false
+	}
+
+	if real.Value != value {
+		t.Errorf("real.Value not %f. got=%f", value, real.Value)
+		return false
+	}
+
 	return true
 }
 

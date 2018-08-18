@@ -28,11 +28,42 @@ func TestEvalIntegerExpression(t *testing.T) {
 		{"3 * 3 * 3 + 10", 37},
 		{"3 * (3 * 3) + 10", 37},
 		{"(5 + 10 * 2 + 15 / 3) * 2 + -10", 50},
+		{"10 % 2", 0},
+		{"10 % 3", 1},
 	}
 
 	for _, tt := range tests {
 		evaluated := testEval(tt.input)
 		testIntegerObject(t, evaluated, tt.expected)
+	}
+}
+
+func TestEvalRealExpression(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected float64
+	}{
+		//Test reals
+		{"5.0", 5.0},
+		{"10.0", 10.0},
+		{"-5.0", -5.0},
+		{"-10.0", -10.0},
+		{"5.0 + 5.0 + 5.0 + 5.0 - 10.0", 10.0},
+		{"2.0 * 2.0 * 2.0 * 2.0 * 2.0", 32.0},
+		{"4.5 * 5.5", 24.75},
+		//Test reals time int
+		{"2.0 * 2", 4.0},
+		{"2.5 + 2", 4.5},
+		{"2.5 - 2", 0.5},
+		{"2.5 / 2", 1.25},
+		{"10.0 % 2", 0.0},
+		{"10.0 % 3", 1.0},
+		{"15.5 % 5", 0.5},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(tt.input)
+		testRealObject(t, evaluated, tt.expected)
 	}
 }
 
@@ -51,6 +82,8 @@ func TestEvalBooleanExpression(t *testing.T) {
 		{"1 != 1", false},
 		{"1 == 2", false},
 		{"1 != 2", true},
+		{"1.0 == 1", true},
+		{"2.5 == 2", false},
 		{"true == true", true},
 		{"false == false", true},
 		{"true == false", false},
@@ -1141,6 +1174,19 @@ func testIntegerObject(t *testing.T, obj object.Object, expected int64) bool {
 	}
 	if result.Value != expected {
 		t.Errorf("object has wrong Value. got=%d, expected=%d", result.Value, expected)
+		return false
+	}
+	return true
+}
+
+func testRealObject(t *testing.T, obj object.Object, expected float64) bool {
+	result, ok := obj.(*object.Real)
+	if !ok {
+		t.Errorf("object is not Real. got=%T (%+v)", obj, obj)
+		return false
+	}
+	if result.Value != expected {
+		t.Errorf("object has wrong Value. got=%f, expected=%f", result.Value, expected)
 		return false
 	}
 	return true

@@ -77,6 +77,8 @@ func (l *Lexer) NextToken() token.Token {
 		tok = newToken(token.SLASH, l.ch)
 	case '*':
 		tok = newToken(token.ASTERISK, l.ch)
+	case '%':
+		tok = newToken(token.MODULO, l.ch)
 	case '<':
 		tok = newToken(token.LT, l.ch)
 	case '>':
@@ -114,8 +116,16 @@ func (l *Lexer) NextToken() token.Token {
 			// Important to call 'return tok' here, because readIdentifier() called readChar()
 			return tok
 		} else if isDigit(l.ch) {
-			tok.Type = token.INT
 			tok.Literal = l.readNumber()
+			if l.ch == '.' {
+				l.readChar()
+				decimal := l.readNumber()
+				tok.Literal = tok.Literal + "." + decimal
+				tok.Type = token.REAL
+			} else {
+				tok.Type = token.INT
+			}
+
 			return tok
 		} else {
 			tok = newToken(token.ILLEGAL, l.ch)

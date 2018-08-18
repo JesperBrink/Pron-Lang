@@ -13,6 +13,7 @@ type BuiltinFunction func(args ...Object) Object
 
 const (
 	INTEGER_OBJ        = "INTEGER"
+	REAL_OBJ           = "REAL"
 	BOOLEAN_OBJ        = "BOOLEAN"
 	NULL_OBJ           = "NULL"
 	RETURN_VALUE_OBJ   = "RETURN_VALUE"
@@ -40,8 +41,17 @@ type Integer struct {
 	Value int64
 }
 
+func (i *Integer) NumberType()      {}
 func (i *Integer) Type() ObjectType { return INTEGER_OBJ }
 func (i *Integer) Inspect() string  { return fmt.Sprintf("%d", i.Value) }
+
+type Real struct {
+	Value float64
+}
+
+func (r *Real) NumberType()      {}
+func (r *Real) Type() ObjectType { return REAL_OBJ }
+func (r *Real) Inspect() string  { return fmt.Sprintf("%f", r.Value) }
 
 type Boolean struct {
 	Value bool

@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"math"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -107,6 +108,9 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 
 	case *ast.IntegerLiteral:
 		return &object.Integer{Value: node.Value}
+
+	case *ast.RealLiteral:
+		return &object.Real{Value: node.Value}
 
 	case *ast.Boolean:
 		return nativeBoolToBooleanObject(node.Value)
@@ -376,22 +380,29 @@ func evalBangOperatorExpression(right object.Object) object.Object {
 }
 
 func evalMinusPrefixOperatorExpression(right object.Object) object.Object {
-	if right.Type() != object.INTEGER_OBJ {
+	if right.Type() == object.INTEGER_OBJ {
+		value := right.(*object.Integer).Value
+		return &object.Integer{Value: -value}
+	} else if right.Type() == object.REAL_OBJ {
+		value := right.(*object.Real).Value
+		return &object.Real{Value: -value}
+	} else {
 		return newError("unknown operator: -%s", right.Type())
 	}
-
-	value := right.(*object.Integer).Value
-	return &object.Integer{Value: -value}
 }
 
 func evalInfixExpression(operator string, left, right object.Object, env *object.Environment) object.Object {
 	switch {
-	case left.Type() != right.Type():
-		return newError("type mismatch: %s %s %s", left.Type(), operator, right.Type())
 	case left.Type() == object.STRING_OBJ && right.Type() == object.STRING_OBJ:
 		return evalStringInfixExpression(operator, left, right)
 	case left.Type() == object.INTEGER_OBJ && right.Type() == object.INTEGER_OBJ:
 		return evalIntegerInfixExpression(operator, left, right)
+	case left.Type() == object.REAL_OBJ && right.Type() == object.REAL_OBJ ||
+		left.Type() == object.INTEGER_OBJ && right.Type() == object.REAL_OBJ ||
+		left.Type() == object.REAL_OBJ && right.Type() == object.INTEGER_OBJ:
+		return evalRealInfixExpression(operator, left, right)
+	case left.Type() != right.Type():
+		return newError("type mismatch: %s %s %s", left.Type(), operator, right.Type())
 	case operator == "==":
 		return nativeBoolToBooleanObject(left == right)
 	case operator == "!=":
@@ -414,6 +425,48 @@ func evalIntegerInfixExpression(operator string, left, right object.Object) obje
 		return &object.Integer{Value: leftValue * rightValue}
 	case "/":
 		return &object.Integer{Value: leftValue / rightValue}
+	case "%":
+		return &object.Integer{Value: leftValue % rightValue}
+	case "<":
+		return nativeBoolToBooleanObject(leftValue < rightValue)
+	case ">":
+		return nativeBoolToBooleanObject(leftValue > rightValue)
+	case "==":
+		return nativeBoolToBooleanObject(leftValue == rightValue)
+	case "!=":
+		return nativeBoolToBooleanObject(leftValue != rightValue)
+	default:
+		return newError("unknown operator: %s %s %s", left.Type(), operator, right.Type())
+	}
+}
+
+func evalRealInfixExpression(operator string, left, right object.Object) object.Object {
+	var leftValue float64
+	var rightValue float64
+
+	if left.Type() == "INTEGER" {
+		leftValue = float64(left.(*object.Integer).Value)
+	} else {
+		leftValue = left.(*object.Real).Value
+	}
+
+	if right.Type() == "INTEGER" {
+		rightValue = float64(right.(*object.Integer).Value)
+	} else {
+		rightValue = right.(*object.Real).Value
+	}
+
+	switch operator {
+	case "+":
+		return &object.Real{Value: leftValue + rightValue}
+	case "-":
+		return &object.Real{Value: leftValue - rightValue}
+	case "*":
+		return &object.Real{Value: leftValue * rightValue}
+	case "/":
+		return &object.Real{Value: leftValue / rightValue}
+	case "%":
+		return &object.Real{Value: math.Mod(leftValue, rightValue)}
 	case "<":
 		return nativeBoolToBooleanObject(leftValue < rightValue)
 	case ">":

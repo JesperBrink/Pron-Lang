@@ -15,6 +15,7 @@ const (
 	IDENT  = "IDENT"  //add, foobar, x, y, ...
 	INT    = "INT"    // 42
 	STRING = "STRING" // "Hello World!"
+	REAL   = "REAL"   // 42.0, 4.5, 3.15, ...
 
 	// Operators
 	ASSIGN    = "="
@@ -23,6 +24,7 @@ const (
 	BANG      = "!"
 	ASTERISK  = "*"
 	SLASH     = "/"
+	MODULO    = "%"
 	EQ        = "=="
 	NOT_EQ    = "!="
 	INCREMENT = "++"

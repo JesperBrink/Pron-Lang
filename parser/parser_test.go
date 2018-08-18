@@ -1414,7 +1414,70 @@ func TestThisKeywordGivesTheOuterMostVariable(t *testing.T) {
 	if !ident.HasThisPrefix {
 		t.Errorf("ident.HasThisPrefix is not 'true'. got=%t", ident.HasThisPrefix)
 	}
+}
 
+func TestIncrementIdentifier(t *testing.T) {
+	input := `i++`
+
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+
+	if len(program.Statements) != 1 {
+		t.Fatalf("program.Statements does not contain 1 statement. got=%d",
+			len(program.Statements))
+	}
+
+	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("program.Statements[0] is not ExpressionStatement. got=%T", program.Statements[0])
+	}
+
+	increment, ok := stmt.Expression.(*ast.Increment)
+	if !ok {
+		t.Fatalf("stmt.Expression is not *ast.Increment. got=%T", stmt.Expression)
+	}
+
+	if increment.TokenLiteral() != "++" {
+		t.Errorf("increment.TokenLiteral() is not '++'. got=%s", increment.TokenLiteral())
+	}
+
+	if increment.Name.Value != "i" {
+		t.Errorf("increment.Name.Value is not 'i'. got=%s", increment.Name.Value)
+	}
+}
+
+func TestDecrementIdentifier(t *testing.T) {
+	input := `i--`
+
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+
+	if len(program.Statements) != 1 {
+		t.Fatalf("program.Statements does not contain 1 statement. got=%d",
+			len(program.Statements))
+	}
+
+	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("program.Statements[0] is not ExpressionStatement. got=%T", program.Statements[0])
+	}
+
+	decrement, ok := stmt.Expression.(*ast.Decrement)
+	if !ok {
+		t.Fatalf("stmt.Expression is not *ast.Decrement. got=%T", stmt.Expression)
+	}
+
+	if decrement.TokenLiteral() != "--" {
+		t.Errorf("decrement.TokenLiteral() is not '--'. got=%s", decrement.TokenLiteral())
+	}
+
+	if decrement.Name.Value != "i" {
+		t.Errorf("decrement.Name.Value is not 'i'. got=%s", decrement.Name.Value)
+	}
 }
 
 ///////////////////////////////////////////

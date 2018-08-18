@@ -353,9 +353,13 @@ func TestBuiltinFunctions(t *testing.T) {
 		{`var a = [4, 2, 5]; rest(a)`, []int64{2, 5}},
 		{`var a = [1]; rest(a)`, []int64{}},
 		{`var a = []; rest(a)`, nil},
-		//Test `push`
-		{`var a = [4, 2, 5]; push(a, 7)`, []int64{4, 2, 5, 7}},
-		{`var a = []; push(a, 1)`, []int64{1}},
+		//Test `add`
+		{`var a = [4, 2, 5]; add(a, 7)`, []int64{4, 2, 5, 7}},
+		{`var a = []; add(a, 1)`, []int64{1}},
+		//Test 'remove'
+		{`var a = [4, 2, 5]; remove(a, 3)`, "index parameter must be between 0 and length of arr - 1"},
+		{`var a = []; remove(a, 1)`, "length of array must be greater than 0"},
+		{`var a = [4, 2, 5]; remove(a, 1)`, []int64{4, 5}},
 	}
 
 	for _, tt := range tests {
@@ -1077,6 +1081,42 @@ func TestThisPrefixedIdentifier(t *testing.T) {
 
 	if str3.Value != "Ole" {
 		t.Errorf("str3.Value is not 'Ole'. got=%s", str3.Value)
+	}
+}
+
+func TestIncrement(t *testing.T) {
+	input := `
+	var i = 0
+	i++
+	i++
+	return i`
+
+	evaluated := testEval(input)
+	integer, ok := evaluated.(*object.Integer)
+	if !ok {
+		t.Fatalf("evaluated is not *object.Integer. got=%T (%+v)", evaluated, evaluated)
+	}
+
+	if integer.Value != 2 {
+		t.Errorf("integer.Value is not 2. got=%d", integer.Value)
+	}
+}
+
+func TestDecrement(t *testing.T) {
+	input := `
+	var i = 1
+	i--
+	i--
+	return i`
+
+	evaluated := testEval(input)
+	integer, ok := evaluated.(*object.Integer)
+	if !ok {
+		t.Fatalf("evaluated is not *object.Integer. got=%T (%+v)", evaluated, evaluated)
+	}
+
+	if integer.Value != -1 {
+		t.Errorf("integer.Value is not -1. got=%d", integer.Value)
 	}
 }
 

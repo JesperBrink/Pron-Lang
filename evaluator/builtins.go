@@ -80,7 +80,7 @@ var builtins = map[string]*object.Builtin{
 			return NULL
 		},
 	},
-	"push": &object.Builtin{
+	"add": &object.Builtin{
 		Fn: func(args ...object.Object) object.Object {
 			if len(args) != 2 {
 				return newError("wrong number of arguments. got=%d, want=2", len(args))
@@ -96,6 +96,40 @@ var builtins = map[string]*object.Builtin{
 			newElements := make([]object.Object, length+1, length+1)
 			copy(newElements, arr.Elements)
 			newElements[length] = args[1]
+
+			return &object.Array{Elements: newElements}
+		},
+	},
+	"remove": &object.Builtin{
+		Fn: func(args ...object.Object) object.Object {
+			if len(args) != 2 {
+				return newError("wrong number of arguments. got=%d, want=2", len(args))
+			}
+
+			if args[0].Type() != object.ARRAY_OBJ {
+				return newError("argument to `push` must be ARRAY, got %s", args[0].Type())
+			}
+
+			arr := args[0].(*object.Array)
+
+			length := len(arr.Elements)
+			if length == 0 {
+				return newError("length of array must be greater than 0")
+			}
+
+			removeIndex := args[1].(*object.Integer)
+			if removeIndex.Value < int64(0) || int64(length-1) < removeIndex.Value {
+				return newError("index parameter must be between 0 and length of arr - 1")
+			}
+
+			newElements := []object.Object{}
+
+			for i, elem := range arr.Elements {
+				if int64(i) != removeIndex.Value {
+					newElements = append(newElements, elem)
+
+				}
+			}
 
 			return &object.Array{Elements: newElements}
 		},

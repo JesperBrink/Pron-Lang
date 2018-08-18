@@ -322,12 +322,28 @@ func (p *Parser) expectPeek(t token.TokenType) bool {
 }
 
 func (p *Parser) parseIdentifier() ast.Expression {
+	// Check for suffixes that change the context
 	if p.peekTokenIs(token.DOT) {
-		// It's CallObjectFunction
 		return p.parseCallObjectFunction()
+	} else if p.peekTokenIs(token.INCREMENT) {
+		return p.parseIncrement()
+	} else if p.peekTokenIs(token.DECREMENT) {
+		return p.parseDecrement()
 	}
 
 	return &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+}
+
+func (p *Parser) parseIncrement() ast.Expression {
+	name := &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+	p.nextToken()
+	return &ast.Increment{Token: p.curToken, Name: *name}
+}
+
+func (p *Parser) parseDecrement() ast.Expression {
+	name := &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+	p.nextToken()
+	return &ast.Decrement{Token: p.curToken, Name: *name}
 }
 
 func (p *Parser) parseThisPrefixedIdentifier() ast.Expression {

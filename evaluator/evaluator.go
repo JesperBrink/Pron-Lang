@@ -150,6 +150,12 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 
 	case *ast.CallObjectFunction:
 		return evalCallObejctFunction(node, env)
+
+	case *ast.Increment:
+		return evalIncrement(node, env)
+
+	case *ast.Decrement:
+		return evalDecrement(node, env)
 	}
 
 	return nil
@@ -170,6 +176,26 @@ func evalProgram(program *ast.Program, env *object.Environment) object.Object {
 	}
 
 	return result
+}
+
+func evalIncrement(node *ast.Increment, env *object.Environment) object.Object {
+	return incrementOrDecrementInteger(node.Name, env, 1)
+}
+
+func evalDecrement(node *ast.Decrement, env *object.Environment) object.Object {
+	return incrementOrDecrementInteger(node.Name, env, -1)
+}
+
+func incrementOrDecrementInteger(name ast.Identifier, env *object.Environment, factor int64) object.Object {
+	integerObj, ok := env.Get(name.Value)
+	if !ok {
+		return newError("%s is not defined", name.Value)
+	}
+
+	integer := integerObj.(*object.Integer)
+	integer.Value = integer.Value + factor
+	env.Update(name.Value, integer)
+	return integer
 }
 
 func evalCallObejctFunction(node *ast.CallObjectFunction, env *object.Environment) object.Object {

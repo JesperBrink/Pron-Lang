@@ -573,3 +573,21 @@ func (cof *CallObjectFunction) String() string {
 
 	return out.String()
 }
+
+type Increment struct {
+	Token token.Token // the ++
+	Name  Identifier
+}
+
+func (i *Increment) expressionNode()      {}
+func (i *Increment) TokenLiteral() string { return i.Token.Literal }
+func (i *Increment) String() string       { return i.Name.Value + "++" }
+
+type Decrement struct {
+	Token token.Token // the ++
+	Name  Identifier
+}
+
+func (d *Decrement) expressionNode()      {}
+func (d *Decrement) TokenLiteral() string { return d.Token.Literal }
+func (d *Decrement) String() string       { return d.Name.Value + "--" }

@@ -46,6 +46,8 @@ func TestNextToken(t *testing.T) {
 			}
 		}
 		var p1 = new Person("Hans")
+		i++
+		i--
 		`
 
 	tests := []struct {
@@ -207,6 +209,10 @@ func TestNextToken(t *testing.T) {
 		{token.LPAREN, "("},
 		{token.STRING, "Hans"},
 		{token.RPAREN, ")"},
+		{token.IDENT, "i"},
+		{token.INCREMENT, "++"},
+		{token.IDENT, "i"},
+		{token.DECREMENT, "--"},
 		{token.EOF, ""},
 	}
 

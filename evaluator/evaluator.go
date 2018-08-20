@@ -28,7 +28,8 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 	case *ast.FunctionLiteral:
 		params := node.Parameters
 		body := node.Body
-		return &object.Function{Parameters: params, Body: body, Env: env}
+		isPublic := node.IsPublic
+		return &object.Function{Parameters: params, Body: body, Env: env, IsPublic: isPublic}
 
 	case *ast.CallExpression:
 		function := Eval(node.Function, env)
@@ -91,12 +92,14 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 		env.Set(node.Name.Value, val)
 
 	case *ast.DirectFunctionStatement:
+		// Make a node.Function a ast.Node
 		var newNode ast.Node
 		newNode = &node.Function
 		val := Eval(newNode, env)
 		if isError(val) {
 			return val
 		}
+		// Set in the env
 		env.Set(node.Name.Value, val)
 
 	case *ast.ClassStatement:
@@ -220,6 +223,10 @@ func evalCallObejctFunction(node *ast.CallObjectFunction, env *object.Environmen
 	}
 	function := functionObject.(*object.Function)
 
+	if !function.IsPublic {
+		return newError("%s is not a public function in %s", node.FunctionName.Value, node.ObjectName)
+	}
+
 	//evalExpressions returns []object.Object
 	arguments := evalExpressions(node.Arguments, obj.Env)
 	// update the function Environment
@@ -262,7 +269,7 @@ func evalObjectInitialization(node *ast.ObjectInitialization, env *object.Enviro
 	classInstanceCopy.Name = classInstance.Name
 	classInstanceCopy.Env = classInstance.Env.GetCopyOfEnvWithOuterEnvNil()
 
-	initFunctionObject, ok := classInstanceCopy.Env.Get("init")
+	initFunctionObject, ok := classInstanceCopy.Env.Get("Init")
 	if !ok {
 
 		// Check number of arguments is 0
@@ -314,7 +321,10 @@ func evalClassStatement(node *ast.ClassStatement, env *object.Environment) objec
 		if isError(val) {
 			return val
 		}
-		classEnv.Set(function.Name.Value, val)
+		// Set isPublic
+		valFn := val.(*object.Function)
+		valFn.IsPublic = function.IsPublic
+		classEnv.Set(function.Name.Value, valFn)
 	}
 
 	var initFunction object.Object
@@ -322,7 +332,7 @@ func evalClassStatement(node *ast.ClassStatement, env *object.Environment) objec
 	// Eval init
 	if node.InitBody != nil {
 		initFunction = &object.InitFunction{Parameters: node.InitParams, Body: node.InitBody, Env: classEnv}
-		classEnv.Set("init", initFunction)
+		classEnv.Set("Init", initFunction)
 	}
 
 	// Put class into global env

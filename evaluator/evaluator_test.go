@@ -739,11 +739,11 @@ func TestClassObject(t *testing.T) {
 		var name = ""
 		var age = 0
 
-		init(name, this.age) {
+		Init(name, this.age) {
 			name = "Hans"
 		}
 
-		func getName(dummyParam) {
+		func GetName(dummyParam) {
 			return name
 		}
 	}`
@@ -783,9 +783,9 @@ func TestClassObject(t *testing.T) {
 	testIntegerObject(t, ageField, 0)
 
 	// check function
-	getName, ok := env.Get("getName")
+	getName, ok := env.Get("GetName")
 	if !ok {
-		t.Errorf("'getName' is not in the env of Person")
+		t.Errorf("'GetName' is not in the env of Person")
 	}
 
 	getNameFunc, ok := getName.(*object.Function)
@@ -799,9 +799,9 @@ func TestClassObject(t *testing.T) {
 	}
 
 	// Check init
-	init, ok := env.Get("init")
+	init, ok := env.Get("Init")
 	if !ok {
-		t.Errorf("'init' is not in the env of Person")
+		t.Errorf("'Init' is not in the env of Person")
 	}
 
 	initFunc, ok := init.(*object.InitFunction)
@@ -836,12 +836,8 @@ func TestObjectInitializationWithParameters(t *testing.T) {
 		var name
 		var age
 
-		init(n, this.age) {
+		Init(n, this.age) {
 			name = n
-		}
-
-		func getName() {
-			return name
 		}
 	}
 	var p = new Person("Hans", 10)
@@ -888,10 +884,6 @@ func TestObjectInitializationWithoutParameters(t *testing.T) {
 	class Person {
 		var name = ""
 		var age = 0
-
-		func getName() {
-			return name
-		}
 	}
 	var p = new Person()
 	return p
@@ -937,12 +929,12 @@ func TestCallObjectFunction(t *testing.T) {
 	class Person {
 		var name = "Hans"
 
-		func getName() {
+		func GetName() {
 			return name
 		}
 	}
 	var p = new Person()
-	return p.getName()
+	return p.GetName()
 	`
 
 	evaluated := testEval(input)
@@ -962,7 +954,7 @@ func TestMultipleObjectInitializations(t *testing.T) {
 		var name
 		var age
 
-		init(n, this.age) {
+		Init(n, this.age) {
 			name = n
 		}
 	}
@@ -1002,7 +994,7 @@ func TestThisParametersIsSetBeforeExecutingInitBody(t *testing.T) {
 	class Person {
 		var name
 
-		init(this.name) {
+		Init(this.name) {
 			name = "OVERRIDDEN"
 		}
 	}
@@ -1058,27 +1050,27 @@ func TestThisPrefixedIdentifier(t *testing.T) {
 	class Person {
 		var name = "Hans"
 
-		func getHans(name) {
+		func GetHans(name) {
 			return this.name
 		}
 
-		func getArgument(name) {
+		func GetArgument(name) {
 			return name
 		}
 
-		func setName(name) {
+		func SetName(name) {
 			this.name = name
 		}
 
-		func getName() {
+		func GetName() {
 			return this.name
 		}
 	}
 	var p = new Person()
-	var n1 = p.getHans("Jens")
-	var n2 = p.getArgument("Jens")
-	p.setName("Ole")
-	var n3 = p.getName()
+	var n1 = p.GetHans("Jens")
+	var n2 = p.GetArgument("Jens")
+	p.SetName("Ole")
+	var n3 = p.GetName()
 	return [n1, n2, n3]
 	`
 
@@ -1172,6 +1164,57 @@ func TestBlockComment(t *testing.T) {
 
 	if integer.Value != 2 {
 		t.Errorf("integer.Value is not 2. got=%d", integer.Value)
+	}
+}
+
+func TestPrivateFunction(t *testing.T) {
+	input := `
+	class Person {
+		func privateFunction() {
+			return 42
+		}
+	}
+	var p = new Person()
+	p.privateFunction()
+	`
+
+	evaluated := testEval(input)
+
+	error, ok := evaluated.(*object.Error)
+	if !ok {
+		t.Fatalf("arr.Elements[1] is not *object.Error. got=%T", evaluated)
+	}
+
+	if error.Message != "privateFunction is not a public function in p" {
+		t.Errorf("error.Message is not privateFunction is not a public function in p. got=%s",
+			error.Message)
+	}
+}
+
+func TestPrivateFunctionsInsideClass(t *testing.T) {
+	input := `
+	class Person {
+		func PublicFunction() {
+			return privateFunction()
+		}
+
+		func privateFunction() {
+			return 42
+		}
+	}
+	var p = new Person()
+	return p.PublicFunction()
+	`
+
+	evaluated := testEval(input)
+
+	integer, ok := evaluated.(*object.Integer)
+	if !ok {
+		t.Fatalf("evaluated is not *object.Integer. got=%T (%+v)", evaluated, evaluated)
+	}
+
+	if integer.Value != 42 {
+		t.Errorf("integer.Value is not 42. got=%d", integer.Value)
 	}
 }
 

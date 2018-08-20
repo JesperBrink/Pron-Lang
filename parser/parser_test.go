@@ -1199,15 +1199,15 @@ func TestClassStatementParsing(t *testing.T) {
 		var name = ""
 		var age = 0
 
-		init(name, this.age) {
+		Init(name, this.age) {
 			name = "Hans"
 		}
 
-		func getName() {
+		func GetName() {
 			return name
 		}
 
-		func getAge() {
+		func GetAge() {
 			return age
 		}
 	}
@@ -1269,12 +1269,12 @@ func TestClassStatementParsing(t *testing.T) {
 			stmt.InitParams[1].IsThisParam)
 	}
 
-	if stmt.Functions[0].Name.String() != "getName" {
-		t.Errorf("stmt.Functions[0].Name is not getName. got=%s", stmt.Functions[0].Name.String())
+	if stmt.Functions[0].Name.String() != "GetName" {
+		t.Errorf("stmt.Functions[0].Name is not GetName. got=%s", stmt.Functions[0].Name.String())
 	}
 
-	if stmt.Functions[1].Name.String() != "getAge" {
-		t.Errorf("stmt.Functions[1].Name is not getAge. got=%s", stmt.Functions[1].Name.String())
+	if stmt.Functions[1].Name.String() != "GetAge" {
+		t.Errorf("stmt.Functions[1].Name is not GetAge. got=%s", stmt.Functions[1].Name.String())
 	}
 }
 
@@ -1545,7 +1545,52 @@ func TestBlockComment(t *testing.T) {
 	if _, ok := stmt.Expression.(*ast.Increment); !ok {
 		t.Errorf("program.Statements[4] is not *ast.Increment. got=%T", stmt.Expression)
 	}
+}
 
+func TestPublicAndPrivateMethods(t *testing.T) {
+	input := `class Person {
+		var name = ""
+
+		Init(this.name) {}
+
+		func GetName() {
+			return name
+		}
+
+		func doPrivateStuff() {}
+	}
+	`
+
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+
+	if len(program.Statements) != 1 {
+		t.Fatalf("program.Statements does not contain %d statements. got=%d\n",
+			1, len(program.Statements))
+	}
+	stmt, ok := program.Statements[0].(*ast.ClassStatement)
+	if !ok {
+		t.Fatalf("program.Statements[0] is not ast.ClassStatement. got=%T",
+			program.Statements[0])
+	}
+
+	if stmt.Functions[0].Name.Value != "GetName" {
+		t.Errorf("Name of first function is not GetName. got=%s", stmt.Functions[0].Name.Value)
+	}
+
+	if stmt.Functions[0].IsPublic != true {
+		t.Errorf("GetName's IsPublic is not true. got=%t", stmt.Functions[0].IsPublic)
+	}
+
+	if stmt.Functions[1].Name.Value != "doPrivateStuff" {
+		t.Errorf("Name of first function is not doPrivateStuff. got=%s", stmt.Functions[1].Name.Value)
+	}
+
+	if stmt.Functions[1].IsPublic != false {
+		t.Errorf("doPrivateStuff's IsPublic is not false. got=%t", stmt.Functions[1].IsPublic)
+	}
 }
 
 ///////////////////////////////////////////

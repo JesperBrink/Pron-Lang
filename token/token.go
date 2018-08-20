@@ -83,7 +83,7 @@ var keywords = map[string]TokenType{
 	"to":     TO,
 	"in":     IN,
 	"class":  CLASS,
-	"init":   INIT,
+	"Init":   INIT,
 	"this":   THIS,
 	"new":    NEW,
 }

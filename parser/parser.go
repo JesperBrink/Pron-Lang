@@ -6,6 +6,7 @@ import (
 	"Pron-Lang/token"
 	"fmt"
 	"strconv"
+	"strings"
 )
 
 const (
@@ -211,6 +212,14 @@ func (p *Parser) parseDirectFunctionStatement() *ast.DirectFunctionStatement {
 	}
 
 	stmt.Name = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+
+	// If first letter is lower case: private else: public
+	firstLetter := stmt.Name.Value[:1]
+	if firstLetter == strings.ToLower(firstLetter) {
+		stmt.IsPublic = false
+	} else {
+		stmt.IsPublic = true
+	}
 
 	if !p.expectPeek(token.LPAREN) {
 		return nil

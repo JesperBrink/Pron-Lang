@@ -41,7 +41,7 @@ func TestNextToken(t *testing.T) {
 		}
 
 		class Person {
-			init(this.name) {
+			Init(this.name) {
 				puts("Initialized")
 			}
 		}
@@ -192,7 +192,7 @@ func TestNextToken(t *testing.T) {
 		{token.CLASS, "class"},
 		{token.IDENT, "Person"},
 		{token.LBRACE, "{"},
-		{token.INIT, "init"},
+		{token.INIT, "Init"},
 		{token.LPAREN, "("},
 		{token.THIS, "this"},
 		{token.DOT, "."},

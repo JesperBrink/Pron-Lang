@@ -3,13 +3,15 @@ class TestClass {
     var age
     var kilo
 
-    init(this.name, this.age, this.kilo) {}
+    Init(this.name, this.age, this.kilo) {
 
-    func getName() {
+    }
+
+    func GetName() {
         return name
     }
 
-    func setName(name) {
+    func SetName(name) {
         this.name = name
     }
 }

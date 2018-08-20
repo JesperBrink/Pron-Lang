@@ -49,7 +49,7 @@ var p = new TestClass("Ole", 24, 50)
 var p2 = new TestClass("Karsten", 30, 60)
 
 
-print("Should be Ole. Is: " + p.getName())
-p.setName("Hans")
-print("Should be Hans. Is: " + p.getName())
-print("Should be Karsten. Is: " + p2.getName())
+print("Should be Ole. Is: " + p.GetName())
+p.SetName("Hans")
+print("Should be Hans. Is: " + p.GetName())
+print("Should be Karsten. Is: " + p2.GetName())*/

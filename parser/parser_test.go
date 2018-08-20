@@ -1500,6 +1500,54 @@ func TestDecrementIdentifier(t *testing.T) {
 	}
 }
 
+func TestBlockComment(t *testing.T) {
+	input := `
+	var i = 0
+	i++
+	i--
+	/*
+	i++
+	i++
+	i++
+	*/
+	i++`
+
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+
+	if len(program.Statements) != 5 {
+		t.Fatalf("program.Statements does not contain 4 statement. got=%d",
+			len(program.Statements))
+	}
+
+	if _, ok := program.Statements[0].(*ast.VarStatement); !ok {
+		t.Errorf("program.Statements[0] is not *ast.VarStatement. got=%T", program.Statements[0])
+	}
+
+	stmt := program.Statements[1].(*ast.ExpressionStatement)
+	if _, ok := stmt.Expression.(*ast.Increment); !ok {
+		t.Errorf("program.Statements[1] is not *ast.Increment. got=%T", stmt.Expression)
+	}
+
+	stmt = program.Statements[2].(*ast.ExpressionStatement)
+	if _, ok := stmt.Expression.(*ast.Decrement); !ok {
+		t.Errorf("program.Statements[2] is not *ast.Decrement. got=%T", stmt.Expression)
+	}
+
+	stmt = program.Statements[3].(*ast.ExpressionStatement)
+	if _, ok := stmt.Expression.(*ast.Null); !ok {
+		t.Errorf("program.Statements[3] is not *ast.Null. got=%T", stmt.Expression)
+	}
+
+	stmt = program.Statements[4].(*ast.ExpressionStatement)
+	if _, ok := stmt.Expression.(*ast.Increment); !ok {
+		t.Errorf("program.Statements[4] is not *ast.Increment. got=%T", stmt.Expression)
+	}
+
+}
+
 ///////////////////////////////////////////
 //////////// Helper functions /////////////
 ///////////////////////////////////////////

@@ -1153,6 +1153,28 @@ func TestDecrement(t *testing.T) {
 	}
 }
 
+func TestBlockComment(t *testing.T) {
+	input := `
+	var i = 0
+	i++
+	i++
+	/*
+	i++
+	i++
+	*/
+	return i`
+
+	evaluated := testEval(input)
+	integer, ok := evaluated.(*object.Integer)
+	if !ok {
+		t.Fatalf("evaluated is not *object.Integer. got=%T (%+v)", evaluated, evaluated)
+	}
+
+	if integer.Value != 2 {
+		t.Errorf("integer.Value is not 2. got=%d", integer.Value)
+	}
+}
+
 //////////////////////////////
 ////// Helper functions //////
 //////////////////////////////

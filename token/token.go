@@ -63,6 +63,10 @@ const (
 	INIT     = "INIT"
 	THIS     = "THIS"
 	NEW      = "NEW"
+
+	// Comments
+	STARTBLOCKCOMMENT = "/*"
+	ENDBLOCKCOMMENT   = "*/"
 )
 
 var keywords = map[string]TokenType{

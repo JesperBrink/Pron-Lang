@@ -786,6 +786,16 @@ func (p *Parser) parseObjectInitialization() ast.Expression {
 	return objectInitialiation
 }
 
+func (p *Parser) parseBlockComment() ast.Expression {
+	for !p.peekTokenIs(token.ENDBLOCKCOMMENT) {
+		p.nextToken()
+	}
+
+	p.nextToken()
+
+	return &ast.Null{}
+}
+
 func New(l *lexer.Lexer) *Parser {
 	p := &Parser{
 		l:      l,
@@ -813,6 +823,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerPrefix(token.FOR, p.parseForloopExpression)
 	p.registerPrefix(token.NEW, p.parseObjectInitialization)
 	p.registerPrefix(token.THIS, p.parseThisPrefixedIdentifier)
+	p.registerPrefix(token.STARTBLOCKCOMMENT, p.parseBlockComment)
 
 	p.infixParseFns = make(map[token.TokenType]infixParseFn)
 	p.registerInfix(token.PLUS, p.parseInfixExpression)

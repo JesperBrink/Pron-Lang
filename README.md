@@ -75,38 +75,115 @@ var smallerMap = remove(myMap, 3)
 ```
 
 ### For Loops
+In Pron there are two types of For Loops. The first increments or decrements a local variables by one each iteration and the other runs through every element in an array.
+```go
+// Increment
+for (i from 0 to 5) {
+    print(i)
+}
+// Prints:
+// 0
+// 1
+// 2
+// 3 
+// 4
 
-#### Increment
+// Decrement
+for (i from 5 to 0) {
+    print(i)
+}
+// Prints:
+// 5
+// 4
+// 3
+// 2 
+// 1
 
-#### Decrement
-
-#### Run through an array
-
-#### Code example
-
+// Iterate through array
+var arr = ["Hey", true, 42, 3.14159265359]
+for (elem in arr) {
+    print(elem)
+}
+// Prints:
+// "Hey"
+// true
+// 42
+// 3.14159265359
+```
 
 ### If/Else statements
-
-#### Code example
-
+If/Else statements in Pron is as follows:
+```go
+if (10 > 5) {
+    print("10 > 5")
+} elif (10 < 5) {
+    print("10 < 5")
+} else {
+    print("10 == 5")
+}
+```
+You can add as many `elif` statements as you want.
 
 ### Functions
-(to typer)
-Ingen specifik returtype
+In Pron you define a function in one of the following two ways:
+```go
+// Define add
+func add(x, y) {
+    return x + y
+}
 
-#### Code example
+// Define sub
+var sub = func(x, y) {
+    return x - y
+}
 
+// Call functions
+add(5,2)
+sub(5,2)
+```
+Both ways does the same. The second way just shows that it is possible to save functions in variables in Pron. Its therefore also possible to save functions inside an array or map.
+
+### Classes
+In Pron you define a class as follows:
+```go
+class Person{
+    var name
+
+    Init(this.name) {
+        // Do something when an Person object is being initialized
+    }
+
+    func getName() {
+        return name
+    }
+
+    func setName(name) {
+        this.name = name
+    }
+}
+```
+The Init function in Pron is the constructor. The `this.name` is a short way of taking an argument `name` and then writing `this.name = name`. Pron automatically knows that you want `name` initialized to this argument.
 
 ### Builtin Functions
 
-#### Code example
+* `print(content)` - prints the content you give as an argument to the terminal
 
-### Classes
+#### Arrays
+* `len(array)` - returns the number of elements in the array
+* `first(array)` - return the first element in the array
+* `last(array)` - return the last element in the array
+* `rest(array)` - return a copy of array without the first element
+* `add(array, elem)` - returns a copy of array with elem added to it
+* `remove(array, idx)` - returns a copy of array without the element at index idx
 
-#### Code example
+#### Maps
+* `add(map, key, value)` - returns a copy of map with the key and value added to it
+* `remove(map, key)` - returns a copy of array without the key/value pair associated with the key argument given
 
 ### Comments
-
+```go
+/* This is a comment in Pron */
+```
 
 ## License
 This project is licensed under the MIT License - see the LICENSE.md file for details

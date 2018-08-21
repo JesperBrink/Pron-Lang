@@ -1,5 +1,5 @@
 # Pron-Lang
-Pron is a small and simple programming language with an intuitive syntax that everyone can understand and use right away.
+Pron is a small and simple programming language with an intuitive syntax that is easy to understand and use right away.
 
 ## Getting Started with Pron
 

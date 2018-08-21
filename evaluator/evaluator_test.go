@@ -376,6 +376,9 @@ func TestBuiltinFunctions(t *testing.T) {
 		//Test len of array
 		{`var a = [1, 2]; len(a)`, 2},
 		{`var a = []; len(a);`, 0},
+		//Test len of map
+		{`var a = {1: "1", 2: "2"}; len(a)`, 2},
+		{`var a = {}; len(a);`, 0},
 		//Test `first`
 		{`var a = [4, 2, 5]; first(a)`, 4},
 		{`var a = []; first(a)`, nil},
@@ -386,13 +389,20 @@ func TestBuiltinFunctions(t *testing.T) {
 		{`var a = [4, 2, 5]; rest(a)`, []int64{2, 5}},
 		{`var a = [1]; rest(a)`, []int64{}},
 		{`var a = []; rest(a)`, nil},
-		//Test `add`
+		//Test `add` on array
 		{`var a = [4, 2, 5]; add(a, 7)`, []int64{4, 2, 5, 7}},
 		{`var a = []; add(a, 1)`, []int64{1}},
-		//Test 'remove'
+		//Test 'remove' on array
 		{`var a = [4, 2, 5]; remove(a, 3)`, "index parameter must be between 0 and length of arr - 1"},
 		{`var a = []; remove(a, 1)`, "length of array must be greater than 0"},
 		{`var a = [4, 2, 5]; remove(a, 1)`, []int64{4, 5}},
+		//Test `add` on map
+		{`var a = {1: "1", 2: "2", 5: "5"}; add(a, 7, "7")`, []string{"1", "2", "5", "7"}},
+		{`var a = {}; add(a, 1, "1")`, []string{"1"}},
+		//Test 'remove' on map
+		{`var a = {1: "1", 2: "2", 5: "5"}; remove(a, 5)`, []string{"1", "2"}},
+		{`var a = {4: "4", 2: "2", 5: "5"}; remove(a, 3)`, "key not found in map"},
+		{`var a = {}; remove(a, 1)`, "cannot remove from empty map"},
 	}
 
 	for _, tt := range tests {
@@ -413,11 +423,25 @@ func TestBuiltinFunctions(t *testing.T) {
 		case []int64:
 			arr, ok := evaluated.(*object.Array)
 			if !ok {
-				t.Errorf("evaluated is not object.Array. got=%+v", evaluated)
+				t.Fatalf("evaluated is not object.Array. got=%+v", evaluated)
 			}
 
-			for i, expectedElem := range arr.Elements {
-				testIntegerObject(t, expectedElem, expected[i])
+			for i, elem := range arr.Elements {
+				testIntegerObject(t, elem, expected[i])
+			}
+		case []string:
+			hash, ok := evaluated.(*object.Hash)
+			if !ok {
+				t.Fatalf("evaluated is not object.Hash. got=%+v", evaluated)
+			}
+
+			for _, elem := range expected {
+				i, _ := strconv.Atoi(elem)
+				key := object.HashKey{Type: object.INTEGER_OBJ, Value: uint64(i)}
+				if hash.Pairs[key].Value.Inspect() != elem {
+					t.Errorf("hash.Pairs[key].Value.Inspect() is not %s. got=%s",
+						elem, hash.Pairs[key].Value.Inspect())
+				}
 			}
 		}
 	}

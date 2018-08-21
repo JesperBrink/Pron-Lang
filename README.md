@@ -7,11 +7,11 @@ Pron is a small and simple programming language with an intuitive syntax that ev
 The Pron interpreter is written in The Go Programming Language. Therefore you will have to install Go before you can run Pron. **[Install Go](https://golang.org/dl/)**
 
 ### Installing
-You just download the git repository and run the main.go file with the folloing command: 
+You just download the git repository and run the main.go file with the following command: 
 ```text
 $ go run main.go 
 ```
-This starts Pron in your terminal. If you want to execute a pron file, you just add the filename after the command: 
+This starts Pron in your terminal. You can stop it again by typing `quit`. If you want to execute a pron file, you just add the filename after the command: 
 ```text
 $ go run main.go filename.pron
 ```
@@ -36,20 +36,43 @@ var pi = 3.14159265359
 var thisIsInitializedToNull
 ```
 
-### Operators
-
-#### Code example
-
-
 ### Arrays
+Like the variables you don't specify the type of the array. This means that you can combine anything in an array in Pron. 
+```go
+var emptyArr = []
+var strings = ["Hello World!", "Cool", "myStr"]
+var combined = [42, "Hello World!", true, 3.14159265359]
 
-#### Code example
+// Extract data from array
+var str = strings[1] // str becomes "Cool"
 
+// Add to array - use add(array, elemToBeAdded)
+// biggerArr becomes: ["Hello World!", "Cool", "myStr", "anotherString"] while strings hasn't changed.
+var biggerArr = add(strings, "anotherString")
+
+// Remove from array - use remove(array, indexToRemoveFrom)
+// smallerArr becomes: ["Hello World!", "myStr"] while strings hasn't changed
+var smallerArr = remove(strings, 1)
+```
 
 ### Maps
+Like the variables and the arrays you don't specify the type. This means that you can have anything as values in you map. On the other hand is it only possible to use string, int and bool as you keys.
+```go
+var emptyMap = {}
+var myMap = {"Hello": "World!", 4: 2, "T": true, 3: ".14159265359"}
 
-#### Code example
+// Extract data from map
+var restOfPi = myMap[3] // restOfPy becomes ".14159265359"
+var myBool = myMap["T"] // myBool becomes true
 
+// Add to map - use add(map, key, value)
+// biggerMap becomes: {"Hello": "World!", 4: 2, "T": true, 3: ".14159265359", "1": 1} while myMap hasn't changed.
+var biggerMap = add(myMap, "1", 1)
+
+// Remove from map - use remove(map, keyToRemove)
+// smallerMap becomes: {"Hello": "World!", 4: 2, "T": true} while myMap hasn't changed
+var smallerMap = remove(myMap, 3)
+```
 
 ### For Loops
 

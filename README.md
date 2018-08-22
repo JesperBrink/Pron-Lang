@@ -6,17 +6,24 @@ Pron is a small and simple programming language with an intuitive syntax that ev
 ### Prerequisites
 The Pron interpreter is written in The Go Programming Language. Therefore you will have to install Go before you can run Pron. **[Install Go](https://golang.org/dl/)**
 
-### Installing
-You just download the git repository and run the main.go file with the following command: 
+### Running Pron
+You can download the executable file from the main package in the project called 'pron'. You can then write the following in your terminal: 
+```text
+$ ./pron
+```
+This starts Pron in your terminal. You can stop it again by typing `quit`. Its also possible to download the whole project from github if you want and then run the main.go file with the following command: 
 ```text
 $ go run main.go 
 ```
-This starts Pron in your terminal. You can stop it again by typing `quit`. If you want to execute a pron file, you just add the filename after the command: 
+If you want to execute a pron file, you just add the filename after the command: 
 ```text
 $ go run main.go filename.pron
 ```
+or you can type this equivalent command if you are using the executable file:
+```text
+$ ./pron filename.pron
+```
 You can find some code examples in the main package of the project called 'testfile.pron' and 'TestClass.pron'.
-
 
 ## Documentation
 

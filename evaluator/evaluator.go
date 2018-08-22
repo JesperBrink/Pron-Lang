@@ -239,7 +239,7 @@ func evalObjectInitialization(node *ast.ObjectInitialization, env *object.Enviro
 
 	if !ok {
 		// Check if class is defined in external file
-		absPath, _ := filepath.Abs("main/" + node.Name.Value + ".pron")
+		absPath, _ := filepath.Abs(node.Name.Value + ".pron")
 		input, err := ioutil.ReadFile(absPath)
 
 		if err != nil {

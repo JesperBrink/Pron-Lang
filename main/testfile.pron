@@ -52,4 +52,4 @@ var p2 = new TestClass("Karsten", 30, 60)
 print("Should be Ole. Is: " + p.GetName())
 p.SetName("Hans")
 print("Should be Hans. Is: " + p.GetName())
-print("Should be Karsten. Is: " + p2.GetName())*/
+print("Should be Karsten. Is: " + p2.GetName())

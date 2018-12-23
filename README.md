@@ -157,7 +157,7 @@ class Person{
     var name
 
     Init(this.name) {
-        // Do something when an Person object is being initialized
+        /* Do something when an Person object is being initialized*/
     }
 
     func getName() {

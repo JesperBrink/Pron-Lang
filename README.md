@@ -160,16 +160,21 @@ class Person{
         /* Do something when an Person object is being initialized*/
     }
 
-    func getName() {
+    func GetName() {
         return name
     }
 
-    func setName(name) {
+    func SetName(name) {
         this.name = name
     }
+    
+    func somePrivateMethod() {
+        /* Do something useful */
+    }    
 }
 ```
 The Init function in Pron is the constructor. The `this.name` is a short way of taking an argument `name` and then writing `this.name = name`. Pron automatically knows that you want `name` initialized to this argument.
+To indicate that a class method is public, make the first letter in the method upper case. Otherwise it will be a local method.
 
 ### Builtin Functions
 
